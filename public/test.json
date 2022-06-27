@@ -1,0 +1,99 @@
+[
+  {
+    "date": "2021-01-07 01:50:20 +0100",
+    "hash": "be07d767aa2126c09255465e6ab14e87bf678a64",
+    "metrics": [
+      {
+        "Name": "C++",
+        "Bytes": 16035,
+        "CodeBytes": 0,
+        "Lines": 586,
+        "Code": 471,
+        "Comment": 38,
+        "Blank": 77,
+        "Complexity": 65,
+        "Count": 3,
+        "WeightedComplexity": 0,
+        "Files": []
+      },
+      {
+        "Name": "C++ Header",
+        "Bytes": 35934,
+        "CodeBytes": 0,
+        "Lines": 1086,
+        "Code": 702,
+        "Comment": 252,
+        "Blank": 132,
+        "Complexity": 141,
+        "Count": 3,
+        "WeightedComplexity": 0,
+        "Files": []
+      },
+      {
+        "Name": "Meson",
+        "Bytes": 453,
+        "CodeBytes": 0,
+        "Lines": 24,
+        "Code": 19,
+        "Comment": 0,
+        "Blank": 5,
+        "Complexity": 0,
+        "Count": 3,
+        "WeightedComplexity": 0,
+        "Files": []
+      },
+      {
+        "Name": "YAML",
+        "Bytes": 2185,
+        "CodeBytes": 0,
+        "Lines": 106,
+        "Code": 96,
+        "Comment": 2,
+        "Blank": 8,
+        "Complexity": 0,
+        "Count": 2,
+        "WeightedComplexity": 0,
+        "Files": []
+      },
+      {
+        "Name": "gitignore",
+        "Bytes": 20,
+        "CodeBytes": 0,
+        "Lines": 1,
+        "Code": 1,
+        "Comment": 0,
+        "Blank": 0,
+        "Complexity": 0,
+        "Count": 2,
+        "WeightedComplexity": 0,
+        "Files": []
+      },
+      {
+        "Name": "CMake",
+        "Bytes": 228,
+        "CodeBytes": 0,
+        "Lines": 9,
+        "Code": 6,
+        "Comment": 0,
+        "Blank": 3,
+        "Complexity": 0,
+        "Count": 1,
+        "WeightedComplexity": 0,
+        "Files": []
+      },
+      {
+        "Name": "Markdown",
+        "Bytes": 317,
+        "CodeBytes": 0,
+        "Lines": 8,
+        "Code": 5,
+        "Comment": 0,
+        "Blank": 3,
+        "Complexity": 0,
+        "Count": 1,
+        "WeightedComplexity": 0,
+        "Files": []
+      }
+    ]
+  }
+]

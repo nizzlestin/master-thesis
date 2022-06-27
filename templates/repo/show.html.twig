@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Repo{% endblock %}
+
+{% block body %}
+    <h1>Repo</h1>
+    <div data-uuid="{{ repo.uuid }}" data-asset-url="{{ asset('repo/'~repo.uuid~'/metrics.json') }}"></div>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ repo.id }}</td>
+            </tr>
+            <tr>
+                <th>Url</th>
+                <td>{{ repo.url }}</td>
+            </tr>
+            <tr>
+                <th>Uuid</th>
+                <td>{{ repo.uuid }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="{{ path('app_repo_index') }}">back to list</a>
+
+    <a href="{{ path('app_repo_edit', {'id': repo.id}) }}">edit</a>
+
+    {{ include('repo/_delete_form.html.twig') }}
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('show_graph') }}
+    {{ encore_entry_link_tags('show_graph') }}
+{% endblock %}

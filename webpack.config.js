@@ -1,5 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
-
+// const webpack = require('webpack');
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
 if (!Encore.isRuntimeEnvironmentConfigured()) {
@@ -21,6 +21,7 @@ Encore
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
     .addEntry('app', './assets/app.js')
+    .addEntry('show_graph', './assets/show-graph.js')
 
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')
@@ -71,5 +72,6 @@ Encore
     // uncomment if you're having problems with a jQuery plugin
     .autoProvidejQuery()
 ;
+const config = Encore.getWebpackConfig();
 
-module.exports = Encore.getWebpackConfig();
+module.exports = config
