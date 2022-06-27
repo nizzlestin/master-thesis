@@ -14,6 +14,7 @@ use function array_merge;
 use function fclose;
 use function fopen;
 use function fwrite;
+use function intval;
 use function json_encode;
 use function mkdir;
 use function sizeof;
@@ -67,11 +68,16 @@ class GitCloneHandler
             }
 
             $tmpMetrics = [];
+            $increment = 1;
+            $limit = 1000;
+            $sizeOfHashes = sizeof($hashes);
+            if($sizeOfHashes > $limit) {
+                $tmpIncrement = round($sizeOfHashes/$limit, 0);
+                $increment = intval($tmpIncrement);
+            }
 
-
-            for ($c = 0; $c < sizeof($hashes); $c += 20000) {
+            for ($c = 0; $c < $sizeOfHashes; $c += $increment) {
                 $h = $hashes[$c];
-//            foreach ($hashes as $h) {
                 $hash = $h[0];
                 $date = $h[1];
                 $dateTime = new DateTimeImmutable($date);
