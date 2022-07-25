@@ -2,3 +2,24 @@ body {
     background-color: lightgray;
 }
 @import "~bootstrap/scss/bootstrap";
+
+.cards-container {
+    column-count: 2;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.cards-container div {
+    //background: floralwhite;
+
+    // to avoid column breaks
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 5px;
+
+}
+//
+//.cards-container div:first-child {
+//    margin: 0;
+//}

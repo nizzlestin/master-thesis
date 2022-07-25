@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 
+{% import 'marcos/common.html.twig' as common %}
 {% block title %}Repo{% endblock %}
 
 {% block body %}
@@ -21,6 +22,13 @@
             </tr>
         </tbody>
     </table>
+    <div class="cards-container">
+    {{ common.graphCard('loc-container', 'Lines of Code') }}
+    {{ common.graphCard('blanks-container', 'Blank lines') }}
+    {{ common.graphCard('comments-container', 'Comment Lines') }}
+    {{ common.graphCard('ratio-container', 'Lines of Code vs All lines Ratio') }}
+    {{ common.graphCard('complexity-container', 'Complexity') }}
+    </div>
     <a href="{{ path('app_repo_index') }}">back to list</a>
 
     <a href="{{ path('app_repo_edit', {'id': repo.id}) }}">edit</a>

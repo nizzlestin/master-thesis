@@ -21,7 +21,6 @@ const formatTime = d3.timeFormat("%d/%m/%Y")
 
 
 $(document).ready(() => {
-    const uuid = $('[data-uuid]').data('uuid');
     const asset = $('[data-asset-url]').data('asset-url');
     d3.json(asset).then((data) => {
         data.forEach(d => {
@@ -38,8 +37,7 @@ $(document).ready(() => {
             color: "steelblue",
             voronoi: false // if true, show Voronoi overlay
         })
-        document.body.append(loc);
-
+        // document.body.append(loc);
         var comment = D3LineChart(data, {
             x: d => d.date,
             y: d => d.Comment,
@@ -50,7 +48,7 @@ $(document).ready(() => {
             color: "steelblue",
             voronoi: false // if true, show Voronoi overlay
         })
-        document.body.append(comment);
+        // document.body.append(comment);
 
         var blanks = D3LineChart(data, {
             x: d => d.date,
@@ -62,7 +60,7 @@ $(document).ready(() => {
             color: "steelblue",
             voronoi: false // if true, show Voronoi overlay
         })
-        document.body.append(blanks);
+        // document.body.append(blanks);
 
         var locvscomments = D3LineChart(data, {
             x: d => d.date,
@@ -75,19 +73,25 @@ $(document).ready(() => {
             color: "steelblue",
             voronoi: false // if true, show Voronoi overlay
         })
-        document.body.append(locvscomments);
+        // document.body.append(locvscomments);
 
         var complexity = D3LineChart(data, {
             x: d => d.date,
             y: d => d.Complexity,
             z: d => d.language,
-            yLabel: "Code Lines/All lines Ratio",
+            yLabel: "Complexity",
             yDomain: [0,1],
             width: 640,
             height: 500,
             color: "steelblue",
             voronoi: false // if true, show Voronoi overlay
         })
-        document.body.append(complexity);
+        // document.body.append(complexity);
+        document.getElementById("loc-container").append(loc)
+        document.getElementById("comments-container").append(comment)
+        document.getElementById("blanks-container").append(blanks)
+        document.getElementById("ratio-container").append(locvscomments)
+        document.getElementById("complexity-container").append(complexity)
+
     })
 })
