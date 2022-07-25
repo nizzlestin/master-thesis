@@ -3,35 +3,48 @@
 {% block title %}Repo index{% endblock %}
 
 {% block body %}
-    <h1>Repo index</h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Url</th>
-                <th>Uuid</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for repo in repos %}
-            <tr>
-                <td>{{ repo.id }}</td>
-                <td>{{ repo.url }}</td>
-                <td>{{ repo.uuid }}</td>
-                <td>
-                    <a href="{{ path('app_repo_show', {'id': repo.id}) }}">show</a>
-{#                    <a href="{{ path('app_repo_edit', {'id': repo.id}) }}">edit</a>#}
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="4">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-code me-1"></i>
+                Repository Index
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Url</th>
+                        <th>Uuid</th>
+                        <th>actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for repo in repos %}
+                        <tr>
+                            <td>{{ repo.id }}</td>
+                            <td>{{ repo.url }}</td>
+                            <td>{{ repo.uuid }}</td>
+                            <td>
+                                <a href="{{ path('app_repo_show', {'id': repo.id}) }}">show</a>
+                                {#                    <a href="{{ path('app_repo_edit', {'id': repo.id}) }}">edit</a>#}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4">no records found</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                <a href="{{ path('app_repo_new') }}">Create new</a>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <a href="{{ path('app_repo_new') }}">Create new</a>
 {% endblock %}
