@@ -19,7 +19,6 @@ export class AnotherLineChart {
 
     wrangle() {
         const vis = this;
-
         var groupedByDate = d3.group(vis.data, d => formatTime(d.date));
         groupedByDate = Array.from(groupedByDate, ([key, values]) => ({key, values}));
         vis.dataFiltered = groupedByDate
@@ -49,13 +48,6 @@ export class AnotherLineChart {
     update() {
         const vis = this;
         vis.t = d3.transition().duration(750);
-
-        // update scales
-
-        // vis.x.;
-        // vis.y.;
-
-
         vis.x = vis.x.domain(d3.extent(vis.dataFiltered, (d) => parseTime(d.date)));
         vis.y = vis.y.domain([0, d3.max(vis.dataFiltered, function (d) {
             return d.metric;
