@@ -5,6 +5,7 @@ namespace App\Service;
 
 
 use App\Entity\Repo;
+use App\Repository\RepoRepository;
 use Exception;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Process\Process;
@@ -15,10 +16,12 @@ use const SIGKILL;
 class LOCMetricCalculator
 {
     private ParameterBagInterface $parameterBag;
+    private RepoRepository $repoRepository;
 
-    public function __construct(ParameterBagInterface $parameterBag)
+    public function __construct(ParameterBagInterface $parameterBag, RepoRepository $repoRepository)
     {
         $this->parameterBag = $parameterBag;
+        $this->repoRepository = $repoRepository;
     }
 
     private function getPublicDirectory(): string {
@@ -38,10 +41,20 @@ class LOCMetricCalculator
             $process->run(function ($type, $buffer) {
 
             });
+            $repo->setGolangMetricsCalculated(true);
+            $this->repoRepository->add($repo, true);
             return json_decode($process->getOutput(), true);
         } catch (Exception $exception) {
             $process->signal(SIGKILL);
             throw $exception;
         }
+    }
+
+    private function executeRustCodeAnalyzer() {
+
+    }
+
+    private function executeCustomerAnalyzer() {
+
     }
 }

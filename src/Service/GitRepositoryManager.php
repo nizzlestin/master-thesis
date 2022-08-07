@@ -5,19 +5,26 @@ namespace App\Service;
 
 
 use App\Entity\Repo;
+use App\Repository\RepoRepository;
+use DateTime;
+use DateTimeImmutable;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Process\Process;
 use function explode;
 use function getcwd;
 use function implode;
+use function intval;
 use function substr;
 use function var_dump;
 
 class GitRepositoryManager
 {
-    public function __construct(ParameterBagInterface $parameterBag)
+    private RepoRepository $repoRepository;
+
+    public function __construct(ParameterBagInterface $parameterBag, RepoRepository $repoRepository)
     {
         $this->parameterBag = $parameterBag;
+        $this->repoRepository = $repoRepository;
     }
 
     private function getPublicDirectory(): string {
@@ -25,13 +32,26 @@ class GitRepositoryManager
     }
 
     public function cloneGitRepository(Repo $repo, int $timeout = null): Process {
-
+        $clonedAt = new DateTimeImmutable();
         $process = new Process(['git', 'clone', $repo->getUrl(), 'repo'], $this->cwd($repo->getUuid()));
         if($timeout !== null) {
             $process->setTimeout($timeout);
         }
         $process->run();
+        if($process->isSuccessful()) {
+            $repo->setCloned(true);
+            $repo->setClonedAt($clonedAt);
+            $repo->setTotalCommits($this->getRevisionCount($repo));
+            $this->repoRepository->add($repo, true);
+        }
         return $process;
+    }
+
+    private function getRevisionCount(Repo $repo): int {
+        $cmd = explode(' ', 'git rev-list --count HEAD');
+        $process = new Process($cmd, $this->cwd($repo->getUuid()));
+        $process->run();
+        return intval($process->getOutput());
     }
 
     public function checkoutCommit(Repo $repo, string $hash) {

@@ -24,6 +24,27 @@ class Repo
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $status;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $totalCommits;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private $clonedAt;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $latestKnownCommit;
+
+    #[ORM\Column(type: 'boolean')]
+    private $cloned;
+
+    #[ORM\Column(type: 'boolean')]
+    private $golangMetricsCalculated;
+
+    #[ORM\Column(type: 'boolean')]
+    private $rustMetricsCalculated;
+
+    #[ORM\Column(type: 'boolean')]
+    private $customMetricsCalculated;
+
     public function __construct()
     {
         $this->uuid = Uuid::v4();
@@ -57,6 +78,90 @@ class Repo
     public function setStatus(?string $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getTotalCommits(): ?int
+    {
+        return $this->totalCommits;
+    }
+
+    public function setTotalCommits(?int $totalCommits): self
+    {
+        $this->totalCommits = $totalCommits;
+
+        return $this;
+    }
+
+    public function getClonedAt(): ?\DateTimeImmutable
+    {
+        return $this->clonedAt;
+    }
+
+    public function setClonedAt(?\DateTimeImmutable $clonedAt): self
+    {
+        $this->clonedAt = $clonedAt;
+
+        return $this;
+    }
+
+    public function getLatestKnownCommit(): ?string
+    {
+        return $this->latestKnownCommit;
+    }
+
+    public function setLatestKnownCommit(?string $latestKnownCommit): self
+    {
+        $this->latestKnownCommit = $latestKnownCommit;
+
+        return $this;
+    }
+
+    public function isCloned(): ?bool
+    {
+        return $this->cloned;
+    }
+
+    public function setCloned(bool $cloned): self
+    {
+        $this->cloned = $cloned;
+
+        return $this;
+    }
+
+    public function isGolangMetricsCalculated(): ?bool
+    {
+        return $this->golangMetricsCalculated;
+    }
+
+    public function setGolangMetricsCalculated(bool $golangMetricsCalculated): self
+    {
+        $this->golangMetricsCalculated = $golangMetricsCalculated;
+
+        return $this;
+    }
+
+    public function isRustMetricsCalculated(): ?bool
+    {
+        return $this->rustMetricsCalculated;
+    }
+
+    public function setRustMetricsCalculated(bool $rustMetricsCalculated): self
+    {
+        $this->rustMetricsCalculated = $rustMetricsCalculated;
+
+        return $this;
+    }
+
+    public function isCustomMetricsCalculated(): ?bool
+    {
+        return $this->customMetricsCalculated;
+    }
+
+    public function setCustomMetricsCalculated(bool $customMetricsCalculated): self
+    {
+        $this->customMetricsCalculated = $customMetricsCalculated;
 
         return $this;
     }

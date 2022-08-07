@@ -7,12 +7,8 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.scss';
-// import './scss/styles.scss';
-
+import * as d3 from 'd3';
 var $ = require("jquery");
-// start the Stimulus application
-import './bootstrap';
-
 
 window.addEventListener('DOMContentLoaded', event => {
 

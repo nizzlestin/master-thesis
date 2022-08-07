@@ -9,16 +9,12 @@
 import './styles/app.scss';
 
 var $ = require("jquery");
-// start the Stimulus application
-import './bootstrap';
 
 import {D3LineChart} from "./js/D3LineChart";
 import * as d3 from 'd3';
 
 const parseTime = d3.timeParse("%d/%m/%Y")
 const formatTime = d3.timeFormat("%d/%m/%Y")
-
-
 
 $(document).ready(() => {
     const asset = $('[data-asset-url]').data('asset-url');
@@ -32,9 +28,10 @@ $(document).ready(() => {
             y: d => d.Lines,
             z: d => d.language,
             yLabel: "lines of code",
-            width: 640,
+            width: 700,
             height: 500,
             color: "steelblue",
+            marginLeft: 80,
             voronoi: false // if true, show Voronoi overlay
         })
         // document.body.append(loc);
@@ -43,9 +40,10 @@ $(document).ready(() => {
             y: d => d.Comment,
             z: d => d.language,
             yLabel: "commented lines",
-            width: 640,
+            width: 700,
             height: 500,
             color: "steelblue",
+            marginLeft: 80,
             voronoi: false // if true, show Voronoi overlay
         })
         // document.body.append(comment);
@@ -55,9 +53,10 @@ $(document).ready(() => {
             y: d => d.Blank,
             z: d => d.language,
             yLabel: "blank lines",
-            width: 640,
+            width: 700,
             height: 500,
             color: "steelblue",
+            marginLeft: 80,
             voronoi: false // if true, show Voronoi overlay
         })
         // document.body.append(blanks);
@@ -68,9 +67,10 @@ $(document).ready(() => {
             z: d => d.language,
             yLabel: "Code Lines/All lines Ratio",
             yDomain: [0,1],
-            width: 640,
+            width: 700,
             height: 500,
             color: "steelblue",
+            marginLeft: 80,
             voronoi: false // if true, show Voronoi overlay
         })
         // document.body.append(locvscomments);
@@ -81,9 +81,10 @@ $(document).ready(() => {
             z: d => d.language,
             yLabel: "Complexity",
             yDomain: [0,1],
-            width: 640,
+            width: 700,
             height: 500,
             color: "steelblue",
+            marginLeft: 80,
             voronoi: false // if true, show Voronoi overlay
         })
         // document.body.append(complexity);

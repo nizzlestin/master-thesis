@@ -23,6 +23,7 @@
         </tbody>
     </table>
     <div class="cards-container">
+
     {{ common.graphCard('loc-container', 'Lines of Code') }}
     {{ common.graphCard('blanks-container', 'Blank lines') }}
     {{ common.graphCard('comments-container', 'Comment Lines') }}
@@ -37,6 +38,8 @@
 {% endblock %}
 {% block javascripts %}
     {{ parent() }}
-    {{ encore_entry_script_tags('show_graph') }}
-    {{ encore_entry_link_tags('show_graph') }}
+{#    {{ encore_entry_script_tags('show_graph') }}#}
+{#    {{ encore_entry_link_tags('show_graph') }}#}
+    {{ encore_entry_script_tags('vis') }}
+    {{ encore_entry_link_tags('vis') }}
 {% endblock %}

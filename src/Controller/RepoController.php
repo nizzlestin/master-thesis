@@ -6,9 +6,7 @@ use App\Entity\Repo;
 use App\Form\RepoType;
 use App\Message\GitClone;
 use App\Repository\RepoRepository;
-use App\Service\GitRepositoryManager;
-use App\Service\LOCMetricCalculator;
-use DateTimeImmutable;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,10 +26,16 @@ use function substr;
 class RepoController extends AbstractController
 {
     #[Route('/', name: 'app_repo_index', methods: ['GET'])]
-    public function index(RepoRepository $repoRepository): Response
+    public function index(RepoRepository $repoRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        $pagination = $paginator->paginate(
+            $repoRepository->findAll(),
+            $request->query->getInt('page', 1),
+            7
+        );
+
         return $this->render('repo/index.html.twig', [
-            'repos' => $repoRepository->findAll(),
+            'repos' => $pagination,
         ]);
     }
 

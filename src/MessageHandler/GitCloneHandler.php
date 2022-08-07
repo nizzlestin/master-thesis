@@ -18,6 +18,7 @@ use function intval;
 use function json_encode;
 use function mkdir;
 use function sizeof;
+use function strtolower;
 use function substr;
 use const SIGKILL;
 
@@ -109,9 +110,6 @@ class GitCloneHandler
         } catch (Exception $exception) {
             $repo->setStatus('error');
             $this->repoRepository->add($repo, true);
-            $cloneProcess->signal(SIGKILL);
-            $cloneProcess->signal(SIGKILL);
         }
-
     }
 }
