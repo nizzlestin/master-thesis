@@ -3,9 +3,13 @@ body {
 }
 @import "~bootstrap/scss/bootstrap";
 @import "../scss/styles";
-
 .cards-container div {
     -webkit-column-break-inside: avoid;
     page-break-inside: avoid;
     break-inside: avoid;
+}
+
+div.slider-div {
+    margin-left: 20px;
+    margin-right: 20px;
 }

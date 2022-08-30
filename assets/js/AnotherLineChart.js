@@ -1,6 +1,8 @@
 import * as d3 from 'd3';
+require('webpack-jquery-ui/slider');
+require('webpack-jquery-ui/css');
+import $ from "jquery";
 
-var $ = require('jquery');
 const parseTime = d3.timeParse("%d/%m/%Y")
 const formatTime = d3.timeFormat("%d/%m/%Y")
 
@@ -13,15 +15,14 @@ export class AnotherLineChart {
         this.unique.map((k, v) => this.uniqueDict[k] = 0)
         this.parentElement = _parentElement;
         this.variable = _config.metric;
-
-        this.init();
+        this.#init();
     }
 
     wrangle() {
         const vis = this;
         var groupedByDate = d3.group(vis.data, d => formatTime(d.date));
         groupedByDate = Array.from(groupedByDate, ([key, values]) => ({key, values}));
-        vis.dataFiltered = groupedByDate
+        vis.allData = groupedByDate
             .map(day => {
                     return day.values.reduce(
                         (accumulator, current) => {
@@ -34,41 +35,48 @@ export class AnotherLineChart {
         const arr = [];
 
 
-        vis.dataFiltered.forEach(d => {
+        vis.allData.forEach(d => {
             vis.unique.forEach(x => {
                 arr.push({"date": d.date, "language": x, "metric": d[x]})
             })
         })
-        vis.dataFiltered = arr
-        vis.renderableData = d3.group(vis.dataFiltered, d => d.language)
-        vis.update()
+        vis.allData = arr
+        // vis.renderableData = d3.group(vis.allData, d => d.language)
     }
 
 
     update() {
         const vis = this;
         vis.t = d3.transition().duration(750);
-        vis.x = vis.x.domain(d3.extent(vis.dataFiltered, (d) => parseTime(d.date)));
-        vis.y = vis.y.domain([0, d3.max(vis.dataFiltered, function (d) {
+        const sliderValues = $(vis.slider.sliderId).slider("values");
+        vis.dataTimeFiltered = vis.allData.filter(d => {
+            return ((parseTime(d.date).getTime() >= sliderValues[0]) && (parseTime(d.date).getTime() <= sliderValues[1]))
+        })
+        vis.renderableData = d3.group(vis.dataTimeFiltered, d => d.language);
+
+        vis.x = vis.x.domain(d3.extent(vis.dataTimeFiltered, (d) => parseTime(d.date)));
+        vis.y = vis.y.domain([0, d3.max(vis.dataTimeFiltered, function (d) {
             return d.metric;
         })]);
-        vis.line = d3.line()
-            .x(d => vis.x(parseTime(d.date)))
-            .y(d => vis.y(d.metric))
-            .curve(d3.curveBasis)
-        vis.renderableData.forEach(d => {
-        })
+
         // update axes
         vis.xAxisCall.scale(vis.x);
         vis.xAxis.transition(vis.t).call(vis.xAxisCall);
         vis.yAxisCall.scale(vis.y);
         vis.yAxis.transition(vis.t).call(vis.yAxisCall);
-        vis.lines = vis.g.append('g')
+        if(vis.lines) {
+            vis.lines.selectAll(".line").remove();
+        }
+        vis.lines = vis.g.append('g');
+
         vis.lines.selectAll(".line")
-            .attr("class", "line")
+            // .attr("class", "line")
             .data(vis.renderableData)
             .enter()
+            .append("g")
+            .attr("class", "line")
             .append("path")
+            .transition(vis.t)
             .attr("d", d => {
                 return d3.line()
                     .x(d => vis.x(parseTime(d.date)))
@@ -76,22 +84,22 @@ export class AnotherLineChart {
                     (d[1])
             })
             .attr("fill", "none")
-            // .attr('transform', `transform(${vis.MARGIN.LEFT}, ${vis.MARGIN.TOP})`)
             .attr("stroke", d => vis.color(d[0]))
             .attr("stroke-width", 2)
     }
 
-    drawLines() {
 
-    }
-
-    init() {
+    #init() {
         const vis = this;
         vis.#preparePlot();
         vis.#prepareScales();
         vis.#addLegend();
-
         vis.wrangle();
+        vis.min = d3.min(vis.allData, (d) => parseTime(d.date))
+        vis.max = d3.max(vis.allData, (d) => parseTime(d.date))
+        vis.#initSliders()
+        vis.update();
+
     }
 
     #preparePlot() {
@@ -156,5 +164,32 @@ export class AnotherLineChart {
             .attr("y", 10)
             .attr("text-anchor", "start")
             .text(d => d.label)
+    }
+
+    #initSliders() {
+        const vis = this;
+        vis.slider = {
+            firstLabelId : vis.parentElement+"-firstDateLabel",
+            secondLabelId : vis.parentElement+"-secondDateLabel",
+            sliderId : vis.parentElement+"-slider"
+        }
+
+        $(vis.slider.firstLabelId).text(formatTime(vis.min))
+        $(vis.slider.secondLabelId).text(formatTime(vis.max))
+        $(vis.slider.sliderId).slider({
+            range: true,
+            max: vis.max.getTime(),
+            min: vis.min.getTime(),
+            step: 86400000, // one day
+            values: [
+                vis.min.getTime(),
+                vis.max.getTime()
+            ],
+            slide: (event, ui) => {
+                $(vis.slider.firstLabelId).text(formatTime(new Date(ui.values[0])))
+                $(vis.slider.secondLabelId).text(formatTime(new Date(ui.values[1])))
+                vis.update()
+            }
+        })
     }
 }

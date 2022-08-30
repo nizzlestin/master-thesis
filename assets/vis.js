@@ -7,8 +7,12 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.scss';
+// require('jquery-ui/ui/widgets/droppable');
+// require('jquery-ui/ui/widgets/sortable');
+// require('jquery-ui/ui/widgets/selectable');
 
-var $ = require("jquery");
+// var $ = require("jquery");
+import $ from 'jquery';
 
 import {AnotherLineChart} from "./js/AnotherLineChart";
 import * as d3 from 'd3';
@@ -30,22 +34,7 @@ function updateCharts() {
 }
 
 $(document).ready(() => {
-    // $("#date-slider").slider({
-    //     range: true,
-    //     max: parseTime("31/10/2017").getTime(),
-    //     min: parseTime("12/5/2013").getTime(),
-    //     step: 86400000, // one day
-    //     values: [
-    //         parseTime("12/5/2013").getTime(),
-    //         parseTime("31/10/2017").getTime()
-    //     ],
-    //     slide: (event, ui) => {
-    //         $("#dateLabel1").text(formatTime(new Date(ui.values[0])))
-    //         $("#dateLabel2").text(formatTime(new Date(ui.values[1])))
-    //         updateCharts()
-    //     }
-    // })
-    
+
     const asset = $('[data-asset-url]').data('asset-url');
     d3.json(asset).then((data) => {
         data.forEach(d => {
@@ -57,7 +46,10 @@ $(document).ready(() => {
         loc = new AnotherLineChart("#loc-container", data, config);
         comment = new AnotherLineChart("#comments-container", data, {'metric': 'Comment'});
         // blanks = new AnotherLineChart("#blanks-container", data, config);
-        // locvscomments = new AnotherLineChart("#ratio-container", data, config);
+        locvscomments = new AnotherLineChart("#ratio-container", data, {'metric': 'ltocratio'});
         // complexity = new AnotherLineChart("#complexity-container", data, config);
+
     })
+
+
 })

@@ -2,5 +2,12 @@
     <div class="card mt-2">
         <div class="card-header text-center">{{ title }}</div>
         <div id="{{ id }}" class="card-body text-center"></div>
+        <div class="card-footer">
+            <div class="slider-div">
+                <label>Date: <span id="{{ id }}-firstDateLabel"></span>-<span id="{{ id }}-secondDateLabel"></span></label>
+                <div id="{{ id }}-slider"></div>
+            </div>
+            <br>
+        </div>
     </div>
 {% endmacro %}

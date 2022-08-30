@@ -72,8 +72,8 @@ class GitCloneHandler
             $increment = 1;
             $limit = 1000;
             $sizeOfHashes = sizeof($hashes);
-            if($sizeOfHashes > $limit) {
-                $tmpIncrement = round($sizeOfHashes/$limit, 0);
+            if ($sizeOfHashes > $limit) {
+                $tmpIncrement = round($sizeOfHashes / $limit, 0);
                 $increment = intval($tmpIncrement);
             }
 
@@ -83,7 +83,9 @@ class GitCloneHandler
                 $date = $h[1];
                 $dateTime = new DateTimeImmutable($date);
                 $this->gitRepositoryManager->checkoutCommit($repo, $hash);
-                $metricsByCommit = $this->metricCalculator->executeScc($repo, substr($hash, 0, 10) . '.csv', 1800);
+                $metricsByCommit = $this->metricCalculator->executeScc($repo, 1800);
+                $rustMetricsByCommit = $this->metricCalculator
+                    ->executeRustCodeAnalyzer($repo, 1800);
                 $tmpMetrics[] = ['date' => $dateTime->format('d/m/Y'), 'hash' => $hash, 'metrics' => $metricsByCommit];
 
             }
