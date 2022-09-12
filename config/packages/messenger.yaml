@@ -16,6 +16,7 @@ framework:
             # sync: 'sync://'
 
         routing:
-            App\Message\GitClone: async
+            App\Message\CloneMessage: async
+            App\Message\MetricMessage: async
             # Route your messages to the transports
             # 'App\Message\YourMessage': async

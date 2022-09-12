@@ -24,16 +24,10 @@ class LOCMetricCalculator
         $this->repoRepository = $repoRepository;
     }
 
-    private function getPublicDirectory(): string {
-        return $this->parameterBag->get('kernel.project_dir') . '/public/repo';
-    }
-
     public function executeScc(Repo $repo, int $timeout = null): array {
         try {
             $id = $repo->getUuid();
-            $options = '-i=js,php,hpp,cu';
-//        $process = new Process(['scc', '--no-gen', '--no-cocomo', '--format', 'csv',"-o=$cwd/$id/$out", '.'], "$cwd/$id/repo/");
-            $process = new Process(['scc', '--no-gen', '--no-cocomo', '--format', 'json'],  $this->getPublicDirectory() . "/$id/repo/");
+            $process = new Process(['scc', '--no-gen', '--no-cocomo', '--format', 'json'],  $this->parameterBag->get('app.repo_dir') . "/$id/repo/");
             if($timeout !== null) {
                 $process->setTimeout($timeout);
             }
@@ -49,8 +43,8 @@ class LOCMetricCalculator
 
     public function executeRustCodeAnalyzer(Repo $repo, int $timeout = null) {
         $id = $repo->getUuid();
-        $cwd = $this->getPublicDirectory() . "/$id/repo/";
-        $outputDir = $this->getPublicDirectory() . "/$id/rust/";
+        $cwd = $this->parameterBag->get('app.repo_dir') . "/$id/repo/";
+        $outputDir = $this->parameterBag->get('app.repo_dir') . "/$id/rust/";
         $cmd = explode(' ', "rust-code-analysis-cli --paths $cwd --metrics -O json -o  --pr");
         $process = new Process([], $cwd);
         if($timeout !== null) {
@@ -61,9 +55,5 @@ class LOCMetricCalculator
         $this->repoRepository->add($repo, true);
 
         return json_decode($process->getOutput(), true);
-    }
-
-    private function executeCustomerAnalyzer() {
-
     }
 }

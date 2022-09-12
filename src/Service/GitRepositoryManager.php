@@ -27,10 +27,6 @@ class GitRepositoryManager
         $this->repoRepository = $repoRepository;
     }
 
-    private function getPublicDirectory(): string {
-        return $this->parameterBag->get('kernel.project_dir') . '/public/repo';
-    }
-
     public function cloneGitRepository(Repo $repo, int $timeout = null): Process {
         $clonedAt = new DateTimeImmutable();
         $process = new Process(['git', 'clone', $repo->getUrl(), 'repo'], $this->cwd($repo->getUuid()));
@@ -65,7 +61,7 @@ class GitRepositoryManager
     }
 
     public function getCommitHashesOfCurrent(Repo $repo): array {
-        $cmd = explode(' ', 'git --no-pager log --pretty=format:"%H,%ci"');
+        $cmd = explode(' ', 'git --no-pager log --pretty=format:"%H,%ci,%cE"');
         $process = new Process($cmd, $this->repo($repo->getUuid()));
         $process->run();
         $cleanedOutput = str_replace('"','',$process->getOutput());
@@ -78,7 +74,7 @@ class GitRepositoryManager
     }
 
     private function cwd(string $subdir): string {
-        return $this->getPublicDirectory().'/'.$subdir;
+        return $this->parameterBag->get('app.repo_dir').'/'.$subdir;
     }
 
     private function repo(string $subdir): string {

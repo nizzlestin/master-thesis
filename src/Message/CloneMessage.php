@@ -2,7 +2,7 @@
 
 namespace App\Message;
 
-class GitClone
+class CloneMessage
 {
     private string $uuid;
 

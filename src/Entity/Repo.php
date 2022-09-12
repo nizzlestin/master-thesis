@@ -47,6 +47,10 @@ class Repo
 
     public function __construct()
     {
+        $this->cloned = false;
+        $this->golangMetricsCalculated = false;
+        $this->rustMetricsCalculated = false;
+        $this->customMetricsCalculated = false;
         $this->uuid = Uuid::v4();
     }
 
