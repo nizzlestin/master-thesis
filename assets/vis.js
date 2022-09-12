@@ -45,9 +45,9 @@ $(document).ready(() => {
 
         loc = new AnotherLineChart("#loc-container", data, config);
         comment = new AnotherLineChart("#comments-container", data, {'metric': 'Comment'});
-        // blanks = new AnotherLineChart("#blanks-container", data, config);
+        blanks = new AnotherLineChart("#blanks-container", data, {'metric': 'Blank'});
         locvscomments = new AnotherLineChart("#ratio-container", data, {'metric': 'ltocratio'});
-        // complexity = new AnotherLineChart("#complexity-container", data, config);
+        complexity = new AnotherLineChart("#complexity-container", data, {'metric': 'Complexity'});
 
     })
 
