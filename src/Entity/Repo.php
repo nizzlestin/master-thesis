@@ -21,9 +21,6 @@ class Repo
     #[ORM\Column(type: 'guid')]
     private string $uuid;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private $status;
-
     #[ORM\Column(type: 'integer', nullable: true)]
     private $totalCommits;
 
@@ -72,18 +69,6 @@ class Repo
     public function getUuid(): ?string
     {
         return $this->uuid;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(?string $status): self
-    {
-        $this->status = $status;
-
-        return $this;
     }
 
     public function getTotalCommits(): ?int
