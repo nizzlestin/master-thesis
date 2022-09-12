@@ -6,16 +6,11 @@ namespace App\Service;
 
 use App\Entity\Repo;
 use App\Repository\RepoRepository;
-use DateTime;
 use DateTimeImmutable;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Process\Process;
 use function explode;
-use function getcwd;
-use function implode;
 use function intval;
-use function substr;
-use function var_dump;
 
 class GitRepositoryManager
 {

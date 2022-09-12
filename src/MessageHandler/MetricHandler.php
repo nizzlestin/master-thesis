@@ -16,7 +16,6 @@ use function fwrite;
 use function intval;
 use function json_encode;
 use function round;
-use function sizeof;
 
 #[AsMessageHandler]
 class MetricHandler
