@@ -40,8 +40,9 @@ class GitRepositoryManager
 
     private function getRevisionCount(Repo $repo): int {
         $cmd = explode(' ', 'git rev-list --count HEAD');
-        $process = new Process($cmd, $this->cwd($repo->getUuid()));
+        $process = new Process($cmd, $this->repo($repo->getUuid()));
         $process->run();
+        echo $process->getOutput();
         return intval($process->getOutput());
     }
 

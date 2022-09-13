@@ -3,9 +3,6 @@
 {% block title %}New Repo{% endblock %}
 
 {% block body %}
-    <h1>Create new Repo</h1>
-
-    {{ include('repo/_form.html.twig') }}
-
+    {{ include('repo/_form.html.twig', {title: 'Create new Repo', form: form}) }}
     <a href="{{ path('app_repo_index') }}">back to list</a>
 {% endblock %}

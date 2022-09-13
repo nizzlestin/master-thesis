@@ -4,10 +4,12 @@ namespace App\Entity;
 
 use App\Repository\RepoRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV4;
 
 #[ORM\Entity(repositoryClass: RepoRepository::class)]
+#[UniqueEntity('url', message: 'This url is already in use.')]
 class Repo
 {
     #[ORM\Id]
@@ -15,7 +17,7 @@ class Repo
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, unique: true)]
     private string $url;
 
     #[ORM\Column(type: 'guid')]

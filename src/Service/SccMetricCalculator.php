@@ -18,8 +18,6 @@ class SccMetricCalculator extends AbstractMetricCalculator
             $process->setTimeout($timeout);
         }
         $process->run();
-        $repo->setGolangMetricsCalculated(true);
-        $this->repoRepository->add($repo, true);
         return json_decode($process->getOutput(), true);
     }
 

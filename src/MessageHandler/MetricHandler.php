@@ -64,6 +64,8 @@ class MetricHandler
                 $tmpMetrics[$calculator->getName()][] = ['date' => $dateTime->format('d/m/Y'), 'hash' => $hash, 'metrics' => $result];
             }
         }
+        $repo->setGolangMetricsCalculated(true);
+        $repo->setRustMetricsCalculated(true);
         $this->repoRepository->add($repo, true);
 
         $metrics = [];

@@ -21,8 +21,6 @@ class RustCodeAnalyzerMetricCalculator extends AbstractMetricCalculator
             $process->setTimeout($timeout);
         }
         $process->run();
-        $repo->setRustMetricsCalculated(true);
-        $this->repoRepository->add($repo, true);
 
         return json_decode($process->getOutput(), true)??[];
     }
