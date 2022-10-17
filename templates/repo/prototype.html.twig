@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% import 'marcos/common.html.twig' as common %}
+{% block title %}Repo{% endblock %}
+
+{% block body %}
+    <div data-uuid="{{ repo.uuid }}" data-asset-url="{{ asset('repo/'~repo.uuid~'/metrics.json') }}"></div>
+    <div class="cards-container">
+        {{ common.smallMultiples('small-multiples', repo.url) }}
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('small_multiples') }}
+    {{ encore_entry_link_tags('small_multiples') }}
+{% endblock %}

@@ -87,4 +87,9 @@ class DummyController extends AbstractController
         $repoRepository->add($repo, true);
         return new Response($repo->getUuid());
     }
+
+    #[Route('/xxx', name: 'app_repo_xxx', methods: ['GET'])]
+    public function xxx(RepoRepository $repoRepository, GitRepositoryManager $gitRepositoryManager, ParameterBagInterface $parameterBag): Response {
+        return $this->render('d3.html.twig');
+    }
 }

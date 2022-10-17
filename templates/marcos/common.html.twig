@@ -1,11 +1,52 @@
 {% macro graphCard(id, title) %}
     <div class="card mt-2">
         <div class="card-header text-center">{{ title }}</div>
-        <div id="{{ id }}" class="card-body text-center"></div>
+        <div id="{{ id }}" class="card-body text-center">
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input style="display: inline" type="radio" name="bidding_no" value="Lines of Code" checked>Lines of Code
+                </label>
+            </div>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="radio" name="metric" value="Complexity">Complexity
+                </label>
+            </div>
+
+        </div>
         <div class="card-footer">
             <div class="slider-div">
                 <label>Date: <span id="{{ id }}-firstDateLabel"></span>-<span id="{{ id }}-secondDateLabel"></span></label>
                 <div id="{{ id }}-slider"></div>
+            </div>
+            <br>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro smallMultiples(id, title) %}
+    <div class="card mt-2">
+        <div class="card-header text-center">{{ title }}</div>
+        <div id="{{ id }}" class="card-body text-center">
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input style="display: inline" type="radio" name="metric_radio" value="Code" checked>Lines Measurements
+                </label>
+            </div>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="radio" name="metric_radio" value="Complexity">Complexity Measurements
+                </label>
+            </div>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="radio" name="metric_radio" value="StatComplexity">Complexity growth by aggregate functions
+                </label>
+            </div>
+            <div class="form-check-inline">
+                <label class="form-check-label">
+                    <input type="radio" name="metric_radio" value="ltocratio">Code vs all lines ratio
+                </label>
             </div>
             <br>
         </div>
