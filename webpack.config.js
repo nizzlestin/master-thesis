@@ -21,8 +21,9 @@ Encore
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
     .addEntry('app', './assets/app.js')
-    .addEntry('show_graph', './assets/show-graph.js')
-    .addEntry('vis', './assets/vis.js')
+    .addEntry('visualisation', './assets/visualisation.js')
+    .addEntry('small_multiples', './assets/SmallMultiples.js')
+    .addEntry('biplot', './assets/Biplot.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

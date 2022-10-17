@@ -6,25 +6,12 @@ use App\Entity\Repo;
 use App\Form\RepoType;
 use App\Message\CloneMessage;
 use App\Repository\RepoRepository;
-use App\Service\GitRepositoryManager;
-use App\Service\RustCodeAnalyzerMetricCalculator;
-use DateTimeImmutable;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use function array_merge;
-use function fclose;
-use function fopen;
-use function fwrite;
-use function intval;
-use function json_encode;
-use function mkdir;
-use function round;
-use function sizeof;
 
 #[Route('/repo')]
 class RepoController extends AbstractController
@@ -67,13 +54,10 @@ class RepoController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_repo_show', methods: ['GET'])]
-    public function show(Repo $repo, ParameterBagInterface $parameterBag, MessageBusInterface $bus): Response
+    public function show(Repo $repo): Response
     {
-//        $bus->dispatch(new GitClone($repo->getUuid()));
-//        $fileContent = file_get_contents($parameterBag->get('kernel.project_dir') . '/public/repo/'.$repo->getUuid().'/metrics.json');
         return $this->render('repo/show.html.twig', [
-            'repo' => $repo,
-//            'fileContent' => json_decode($fileContent)
+            'repo' => $repo
         ]);
     }
 
@@ -95,13 +79,13 @@ class RepoController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_repo_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'app_repo_delete', methods: ['POST'])]
     public function delete(Request $request, Repo $repo, RepoRepository $repoRepository): Response
     {
         if ($this->isCsrfTokenValid('delete' . $repo->getId(), $request->request->get('_token'))) {
             $repoRepository->remove($repo, true);
         }
 
-        return $this->redirectToRoute('app_repo_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_dashboard_index', [], Response::HTTP_SEE_OTHER);
     }
 }

@@ -27,7 +27,7 @@ class LOCMetricCalculator
     public function executeScc(Repo $repo, int $timeout = null): array {
         try {
             $id = $repo->getUuid();
-            $process = new Process(['scc', '--no-gen', '--no-cocomo', '--format', 'json'],  $this->parameterBag->get('app.repo_dir') . "/$id/repo/");
+            $process = new Process(['scc', '--no-gen', '--no-cocomo', '--by-file', '--format', 'json'],  $this->parameterBag->get('app.repo_dir') . "/$id/repo/");
             if($timeout !== null) {
                 $process->setTimeout($timeout);
             }

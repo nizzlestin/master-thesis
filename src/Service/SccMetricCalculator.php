@@ -13,12 +13,12 @@ class SccMetricCalculator extends AbstractMetricCalculator
     public function execute(Repo $repo, int $timeout = null): array
     {
         $id = $repo->getUuid();
-        $process = new Process(['scc', '--no-gen', '--no-cocomo', '--format', 'json', '--include-ext', FileExtensions::asString()], $this->parameterBag->get('app.repo_dir') . "/$id/repo/");
+        $process = new Process(['scc', '--no-gen', '--no-cocomo', '--by-file', '--format', 'json', '--include-ext', FileExtensions::asString()], $this->parameterBag->get('app.repo_dir') . "/$id/repo/");
         if ($timeout !== null) {
             $process->setTimeout($timeout);
         }
         $process->run();
-        return json_decode($process->getOutput(), true);
+        return is_array(json_decode($process->getOutput(), true)) ? json_decode($process->getOutput(), true) : [];
     }
 
     public function reformatAndStore(array $result)
@@ -26,7 +26,8 @@ class SccMetricCalculator extends AbstractMetricCalculator
 
     }
 
-    public function getName(): string {
+    public function getName(): string
+    {
         return 'scc';
     }
 }

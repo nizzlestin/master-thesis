@@ -57,7 +57,7 @@ class GitRepositoryManager
     }
 
     public function getCommitHashesOfCurrent(Repo $repo): array {
-        $cmd = explode(' ', 'git --no-pager log --pretty=format:"%H,%ci,%cE"');
+        $cmd = explode(' ', 'git --no-pager log --pretty=format:"%H,%ci,%cE" --no-merges');
         $process = new Process($cmd, $this->repo($repo->getUuid()));
         $process->run();
         $cleanedOutput = str_replace('"','',$process->getOutput());
