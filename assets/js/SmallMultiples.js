@@ -31,8 +31,13 @@ export class SmallMultiples {
     update(metric) {
         const vis = this;
         vis.dataByMetric = vis.data.filter(d => d.metric === metric)
+        const sliderValues = $(vis.slider.sliderId).slider("values");
+        vis.dataByMetric = vis.dataByMetric.filter(d => {
+            return ((d.date.getTime() >= sliderValues[0]) && (d.date.getTime() <= sliderValues[1]))
+        })
         const sumstat = d3.group(vis.dataByMetric, d => d.language);
-        const x = d3.scaleLinear()
+
+        const x = d3.scaleTime()
             .domain(d3.extent(vis.dataByMetric, function (d) {
                 return d.date;
             }))
@@ -42,13 +47,23 @@ export class SmallMultiples {
                 return +d.value;
             })])
             .range([vis.height, 0]);
-        // vis.svg.selectAll(".x.axis")
-        //     .call()
+        vis.xScale = x;
+        vis.yScale = y;
+
+        vis.svg.selectAll(".x.axis")
+            .transition().duration(750)
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-55)");
         vis.svg.selectAll(".y.axis")
             .transition().duration(750)
             .call(d3.axisLeft(y).ticks(5, 's'));
+        vis.svg.data(sumstat)
+
         vis.svg.select('.line')
-            .data(sumstat)
             .transition().duration(750)
             .attr("d", function (d) {
                 return d3.line()
@@ -60,7 +75,19 @@ export class SmallMultiples {
                     })
                     (d[1])
             })
+        vis.svg.selectAll(".points").remove()
+        vis.svg.selectAll(".points").data(d => {
+            return d[1]
+        }).join("circle")
+            .attr("class", "points")
+            .attr("cx", d => x(d.date))
+            .attr("cy", d => y(d.value))
+            .style("fill", d => vis.color(d.language))
+            .attr("r", 2)
+            .attr("stroke", "white")
+            .attr("stroke-width", "0.1px")
     }
+
     #init() {
         const vis = this;
         vis.dataByMetric = vis.data.filter(d => d.metric === vis.config.metric)
@@ -78,7 +105,7 @@ export class SmallMultiples {
                 `translate(${vis.margin.left},${vis.margin.top})`);
 
         // Add X axis --> it is a date format
-        const x = d3.scaleLinear()
+        const x = d3.scaleTime()
             .domain(d3.extent(vis.dataByMetric, function (d) {
                 return d.date;
             }))
@@ -92,9 +119,7 @@ export class SmallMultiples {
             .append("g")
             .attr("class", "x axis")
             .attr("transform", `translate(0, ${vis.height})`)
-            .call(d3.axisBottom(d3.scaleTime()
-                .domain(d3.extent(vis.dataByMetric, d => d.date))
-                .range([0, vis.width])))
+            .call(d3.axisBottom(x))
             .selectAll("text")
             .style("text-anchor", "end")
             .attr("dx", "-.8em")
@@ -131,6 +156,15 @@ export class SmallMultiples {
                     (d[1])
             })
 
+        vis.svg.selectAll("points").data(d => d[1]).join("circle")
+            .attr("class", "points")
+            .attr("cx", d => x(d.date))
+            .attr("cy", d => y(d.value))
+            .style("fill", d => vis.color(d.language))
+            .attr("r", 2)
+            .attr("stroke", "white")
+            .attr("stroke-width", "0.1px")
+
         // Add titles
         vis.svg
             .append("text")
@@ -144,91 +178,80 @@ export class SmallMultiples {
                 return vis.color(d[0])
             })
 
-        d3.selectAll(("input[name='metric_radio']")).on('change', function(){
+        d3.selectAll(("input[name='metric_radio']")).on('change', function () {
             vis.update(this.value)
+        })
+        vis.#initSliders()
+    }
+
+    #initSliders() {
+        const vis = this;
+        vis.slider = {
+            firstLabelId: vis.parentElement + "-firstDateLabel",
+            secondLabelId: vis.parentElement + "-secondDateLabel",
+            sliderId: vis.parentElement + "-slider"
+        }
+        vis.min = d3.min(vis.data, (d) => d.date)
+        vis.max = d3.max(vis.data, (d) => d.date)
+        console.log(vis.max, vis.min)
+        $(vis.slider.firstLabelId).text(formatTime(vis.min))
+        $(vis.slider.secondLabelId).text(formatTime(vis.max))
+        $(vis.slider.sliderId).slider({
+            range: true,
+            max: vis.max.getTime(),
+            min: vis.min.getTime(),
+            step: 86400000, // one day
+            values: [
+                vis.min.getTime(),
+                vis.max.getTime()
+            ],
+            slide: (event, ui) => {
+                $(vis.slider.firstLabelId).text(formatTime(new Date(ui.values[0])))
+                $(vis.slider.secondLabelId).text(formatTime(new Date(ui.values[1])))
+                vis.update($("input[name='metric_radio']").attr('value'))
+            }
         })
     }
 
-    tooltip() {
+    mousemove(event) {
         const vis = this;
-        vis.tooltip = d3.select(vis.parentElement).append("div")
-            .attr('id', 'tooltip')
-            .style('position', 'absolute')
-            .style("background-color", "#D3D3D3")
-            .style('padding', 6)
-            .style('display', 'none')
+        var mouse = d3.pointer(event)
+        d3.selectAll(".mouse-per-line")
+            .attr("transform", function (d, i) {
+                const xDate = vis.xScale.invert(mouse[0]);
+                const bisect = d3.bisector(function (d) {
+                    return d.date;
+                }).left;
+                const idx = bisect(d[1], xDate);
 
-        vis.mouseG = vis.svg.append("g")
-            .attr("class", "mouse-over-effects");
-
-        vis.mouseG.append("path") // create vertical line to follow mouse
-            .attr("class", "mouse-line")
-            .style("stroke", "#A9A9A9")
-            .style("stroke-width", vis.lineStroke)
-            .style("opacity", "0");
-
-
-        vis.mousePerLine = vis.mouseG.selectAll('.mouse-per-line')
-            .data(vis.res_nested)
-            .enter()
-            .append("g")
-            .attr("class", "mouse-per-line");
-
-        vis.mousePerLine.append("circle")
-            .attr("r", 4)
-            .style("stroke", function (d) {
-                return vis.color(d.key)
-            })
-            .style("fill", "none")
-            .style("stroke-width", vis.lineStroke)
-            .style("opacity", "0");
-
-        vis.mouseG.append('svg:rect')
-            .attr('width', vis.width)
-            .attr('height', vis.height)
-            .attr('fill', 'none')
-            .attr('pointer-events', 'all')
-            .on('mouseout', function () {
                 d3.select(".mouse-line")
-                    .style("opacity", "0");
-                d3.selectAll(".mouse-per-line circle")
-                    .style("opacity", "0");
-                d3.selectAll(".mouse-per-line text")
-                    .style("opacity", "0");
-                d3.selectAll("#tooltip")
-                    .style('display', 'none')
-
-            })
-            .on('mouseover', function () {
-                d3.select(".mouse-line")
-                    .style("opacity", "1");
-                d3.selectAll(".mouse-per-line circle")
-                    .style("opacity", "1");
-                d3.selectAll("#tooltip")
-                    .style('display', 'block')
-            })
-            .on('mousemove', function (event) {
-                var mouse = d3.pointer(event)
-
-                d3.selectAll(".mouse-per-line")
-                    .attr("transform", function (d, i) {
-                        const xDate = vis.xScale.invert(mouse[0]); // use 'invert' to get date corresponding to distance from mouse position relative to svg
-                        const bisect = d3.bisector(function (d) {
-                            return d.date;
-                        }).left;
-                        const idx = bisect(d[1], xDate);
-
-                        d3.select(".mouse-line")
-                            .attr("d", function () {
-                                let data = "M" + vis.xScale(d[1][idx].date) + "," + (vis.height);
-                                data += " " + vis.xScale(d[1][idx].date) + "," + 0;
-                                return data;
-                            });
-                        return "translate(" + vis.xScale(d[1][idx].date) + "," + vis.yScale(d[1][idx].value) + ")";
-
+                    .attr("d", function () {
+                        let data = "M" + vis.xScale(d[1][idx].date) + "," + (vis.height);
+                        data += " " + vis.xScale(d[1][idx].date) + "," + 0;
+                        return data;
                     });
+                return "translate(" + vis.xScale(d[1][idx].date) + "," + vis.yScale(d[1][idx].value) + ")";
 
-                vis.updateTooltipContent(event, mouse, vis.res_nested)
-            })
+            });
+
+        vis.updateTooltipContent(event, mouse, vis.res_nested)
+    }
+    mouseover(event) {
+        d3.select(".mouse-line")
+            .style("opacity", "1");
+        d3.selectAll(".mouse-per-line circle")
+            .style("opacity", "1");
+        d3.selectAll("#tooltip")
+            .style('display', 'block')
+    }
+    mouseout(event) {
+        d3.select(".mouse-line")
+            .style("opacity", "0");
+        d3.selectAll(".mouse-per-line circle")
+            .style("opacity", "0");
+        d3.selectAll(".mouse-per-line text")
+            .style("opacity", "0");
+        d3.selectAll("#tooltip")
+            .style('display', 'none')
     }
 }

@@ -23,6 +23,7 @@ use function is_array;
 use function is_float;
 use function json_encode;
 use function max;
+use function memory_get_usage;
 use function round;
 use function sort;
 
@@ -125,7 +126,7 @@ class MetricHandler
     private function getIncrementor($totalHashes)
     {
         $increment = 1;
-        $limit = 1000;
+        $limit = 250;
         if ($totalHashes > $limit) {
             $tmpIncrement = round($totalHashes / $limit, 0);
             $increment = intval($tmpIncrement);

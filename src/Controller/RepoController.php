@@ -40,7 +40,7 @@ class RepoController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $repoOrNull = $repoRepository->findOneBy(['url' => $repo->getUrl()]);
             if($repoOrNull !== null) {
-                return $this->redirectToRoute('app_repo_show', ['id' => $repoOrNull->getId()]);
+                return $this->redirectToRoute('app_dashboard_index');
             }
             $repoRepository->add($repo, true);
             $bus->dispatch(new CloneMessage($repo->getUuid()));

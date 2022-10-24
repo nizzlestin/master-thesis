@@ -62,6 +62,7 @@ $(document).ready(() => {
         var res = finalData.map((d, i) => {
             var ratio = Math.round(d.Code*100 / (d.Comment + d.Code))/100;
             var ltoc = ratio ? ratio : 1.0;
+            ltoc = ltoc*100
             return [
                 makeDict(d.date, 'Code', d.Code, d.language, d.hash),
                 makeDict(d.date, 'ltocratio', ltoc, d.language, d.hash),

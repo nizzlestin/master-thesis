@@ -26,7 +26,7 @@
 
 {% macro smallMultiples(id, title) %}
     <div class="card mt-2">
-        <div class="card-header text-center">{{ title }}</div>
+        <div class="card-header text-center"><button class="btn" id="downloadSVG"><i class="fa-solid fa-download"></i></button>{{ title }}</div>
         <div id="{{ id }}" class="card-body text-center">
             <div class="form-check-inline">
                 <label class="form-check-label">
@@ -47,6 +47,13 @@
                 <label class="form-check-label">
                     <input type="radio" name="metric_radio" value="ltocratio">Code vs all lines ratio
                 </label>
+            </div>
+            <br>
+        </div>
+        <div class="card-footer">
+            <div class="slider-div">
+                <label>Date: <span id="{{ id }}-firstDateLabel"></span>-<span id="{{ id }}-secondDateLabel"></span></label>
+                <div id="{{ id }}-slider"></div>
             </div>
             <br>
         </div>

@@ -110,7 +110,6 @@ export class TestChart {
             })
             .on('mousemove', function (event) {
                 var mouse = d3.pointer(event)
-
                 d3.selectAll(".mouse-per-line")
                     .attr("transform", function (d, i) {
                         const xDate = vis.xScale.invert(mouse[0]); // use 'invert' to get date corresponding to distance from mouse position relative to svg
@@ -358,8 +357,8 @@ export class TestChart {
         $(vis.slider.secondLabelId).text(formatTime(vis.max))
         $(vis.slider.sliderId).slider({
             range: true,
-            max: vis.max.getTime(),
-            min: vis.min.getTime(),
+            max: vis.max.getTime(), //max date of all data
+            min: vis.min.getTime(), //min date of all data
             step: 86400000, // one day
             values: [
                 vis.min.getTime(),

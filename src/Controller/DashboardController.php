@@ -17,7 +17,7 @@ class DashboardController extends AbstractController
     public function index(Request $request, RepoRepository $repoRepository, PaginatorInterface $paginator): Response
     {
         $pagination = $paginator->paginate(
-            $repoRepository->findAll(),
+            $repoRepository->findBy([], ['id' => 'DESC']),
             $request->query->getInt('page', 1),
             7
         );
