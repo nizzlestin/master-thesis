@@ -26,6 +26,9 @@ class Repo
     #[ORM\Column(type: 'integer', nullable: true)]
     private $totalCommits;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $evaluatedCommits;
+
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private $clonedAt;
 
@@ -155,6 +158,16 @@ class Repo
         $this->customMetricsCalculated = $customMetricsCalculated;
 
         return $this;
+    }
+
+    public function getEvaluatedCommits(): int
+    {
+        return $this->evaluatedCommits;
+    }
+
+    public function setEvaluatedCommits(int $evaluatedCommits): void
+    {
+        $this->evaluatedCommits = $evaluatedCommits;
     }
 
 }

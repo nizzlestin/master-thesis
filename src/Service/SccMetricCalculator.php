@@ -10,7 +10,7 @@ use function json_decode;
 
 class SccMetricCalculator extends AbstractMetricCalculator
 {
-    public function execute(Repo $repo, int $timeout = null): array
+    public function execute(Repo $repo, string $output = "out.json", int $timeout = null): array
     {
         $id = $repo->getUuid();
         $process = new Process(['scc', '--no-gen', '--no-cocomo', '--by-file', '--format', 'json', '--include-ext', FileExtensions::asString()], $this->parameterBag->get('app.repo_dir') . "/$id/repo/");

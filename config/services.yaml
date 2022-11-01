@@ -24,8 +24,8 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Service\SccMetricCalculator:
         tags: [app.metric_calculator]
-    App\Service\RustCodeAnalyzerMetricCalculator:
-        tags: [app.metric_calculator]
-    App\MessageHandler\MetricHandler:
-        arguments:
-            - !tagged_iterator app.metric_calculator
+#    App\Service\RustCodeAnalyzerMetricCalculator:
+#        tags: [app.metric_calculator]
+#    App\MessageHandler\MetricHandler:
+#        arguments:
+#            - !tagged_iterator app.metric_calculator

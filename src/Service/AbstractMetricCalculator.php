@@ -19,7 +19,7 @@ abstract class AbstractMetricCalculator
 
 
 
-    abstract public function execute(Repo $repo, int $timeout = null): array;
+    abstract public function execute(Repo $repo, string $output, int $timeout = null): array;
     abstract public function reformatAndStore(array $result);
     abstract public function getName(): string;
 }

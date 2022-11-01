@@ -10,7 +10,7 @@ use function json_decode;
 class RustCodeAnalyzerMetricCalculator extends AbstractMetricCalculator
 {
 
-    public function execute(Repo $repo, int $timeout = null): array
+    public function execute(Repo $repo, string $output, int $timeout = null): array
     {
         $id = $repo->getUuid();
         $cwd = $this->parameterBag->get('app.repo_dir') . "/$id/repo/";

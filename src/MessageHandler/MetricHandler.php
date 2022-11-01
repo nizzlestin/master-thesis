@@ -2,19 +2,24 @@
 
 namespace App\MessageHandler;
 
+use App\Message\JsonFileMergeMessage;
 use App\Message\MetricMessage;
 use App\Repository\RepoRepository;
 use App\Service\AbstractMetricCalculator;
 use App\Service\GitRepositoryManager;
+use App\Service\SccMetricCalculator;
 use DateTime;
 use DateTimeImmutable;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 use function array_filter;
+use function array_map;
 use function array_merge;
 use function array_reduce;
 use function array_sum;
 use function count;
+use function end;
 use function fclose;
 use function fopen;
 use function fwrite;
@@ -22,10 +27,12 @@ use function intval;
 use function is_array;
 use function is_float;
 use function json_encode;
+use function key;
 use function max;
 use function memory_get_usage;
 use function round;
 use function sort;
+use function sprintf;
 
 #[AsMessageHandler]
 class MetricHandler
@@ -33,14 +40,16 @@ class MetricHandler
     private RepoRepository $repoRepository;
     private GitRepositoryManager $gitRepositoryManager;
     private ParameterBagInterface $parameterBag;
-    private iterable $calculators;
+    private MessageBusInterface $messageBus;
+    private SccMetricCalculator $calculator;
 
-    public function __construct(iterable $calculators, GitRepositoryManager $gitRepositoryManager, RepoRepository $repoRepository, ParameterBagInterface $parameterBag)
+    public function __construct(MessageBusInterface $messageBus, SccMetricCalculator $calculator, GitRepositoryManager $gitRepositoryManager, RepoRepository $repoRepository, ParameterBagInterface $parameterBag)
     {
         $this->gitRepositoryManager = $gitRepositoryManager;
         $this->repoRepository = $repoRepository;
         $this->parameterBag = $parameterBag;
-        $this->calculators = $calculators;
+        $this->messageBus = $messageBus;
+        $this->calculator = $calculator;
     }
 
     public function __invoke(MetricMessage $message): void
@@ -50,41 +59,27 @@ class MetricHandler
             return;
         }
 
-        $hashes = $this->gitRepositoryManager->getCommitHashesOfCurrent($repo);
+        $tmpHashes = array_reverse($this->gitRepositoryManager->getCommitHashesOfCurrent($repo));
         $this->repoRepository->add($repo, true);
-
-        $tmpMetrics = [];
-        foreach ($this->calculators as $calculator) {
-            /** @var AbstractMetricCalculator $calculator */
-            $tmpMetrics[$calculator->getName()] = [];
-        }
-
-        $sizeOfHashes = count($hashes);
+        $hashes = [];
+        $sizeOfHashes = count($tmpHashes);
         $increment = $this->getIncrementor($sizeOfHashes);
 
+        $i = 1;
         for ($c = 0; $c < $sizeOfHashes; $c += $increment) {
-            $h = $hashes[$c];
+            $hashes[] = $tmpHashes[$c];
+        }
+        $lastElementKey = array_key_last($hashes);
+        foreach ($hashes as $index => $h) {
             $hash = $h[0];
             $date = $h[1];
             $committerMail = $h[2];
             $dateTime = new DateTimeImmutable($date);
             $this->gitRepositoryManager->checkoutCommit($repo, $hash);
-            foreach ($this->calculators as $calculator) {
-                /** @var AbstractMetricCalculator $calculator */
-                $result = $calculator->execute($repo, 1800);
-                $tmpMetrics[$calculator->getName()][] = ['date' => $dateTime->format('d/m/Y'), 'hash' => $hash, 'committer' => $committerMail, 'metrics' => $result];
-            }
-        }
-        $repo->setGolangMetricsCalculated(true);
-        $repo->setRustMetricsCalculated(true);
-        $this->repoRepository->add($repo, true);
-
-        $metrics = [];
-        foreach ($tmpMetrics['scc'] as $commit) {
-            foreach ($commit['metrics'] as $metric) {
-                if(empty($metric)) {
-                    continue;
-                }
+            /** @var AbstractMetricCalculator $calculator */
+            $result = $this->calculator->execute($repo, $i.".json",1800);
+            $innerLastElementKey = array_key_last($result);
+            foreach ($result as $innerIndex => $metric) {
                 $language = $metric['Name'];
                 unset($metric['Name']);
                 $files = $metric['Files'];
@@ -97,6 +92,9 @@ class MetricHandler
                         $max = $complexity;
                         $metric['max'] = $max;
                         $metric['maxFile'] = $maxFile['Filename'];
+                    } else {
+                        $metric['max'] = 0;
+                        $metric['maxFile'] = null;
                     }
                 }
                 $complexities = array_map(function ($f) {
@@ -107,20 +105,22 @@ class MetricHandler
                 $metric['median'] = $median;
                 $metric['average'] = $average;
                 unset($metric['Files']);
-                $metrics[] = array_merge(['date' => $commit['date'], 'hash' => $commit['hash'], 'committer' => $commit['committer'], 'language' => $language], $metric);
+                $tmpMetric = array_merge(['date' => $dateTime->format('d/m/Y'), 'hash' => $hash, 'committer' => $committerMail, 'language' => $language], $metric);
+                $file = fopen($this->parameterBag->get('app.repo_dir') . '/' . $repo->getUuid() . '/'.$i.'.jsontmp', 'w');
+                if($index == $lastElementKey && $innerIndex == $innerLastElementKey) {
+                    fwrite($file, json_encode($tmpMetric));
+                }
+                else {
+                    fwrite($file, json_encode($tmpMetric).",");
+                }
+                fclose($file);
+                $i = $i+1;
             }
         }
-        usort($metrics, function ($item1, $item2) {
-            $a = DateTime::createFromFormat('d/m/Y', $item1['date']);
-            $b = DateTime::createFromFormat('d/m/Y', $item2['date']);
-            return $a <=> $b;
-        });
+        $repo->setEvaluatedCommits($i);
+        $repo->setGolangMetricsCalculated(true);
         $this->repoRepository->add($repo, true);
-
-        $file = fopen($this->parameterBag->get('app.repo_dir') . '/' . $repo->getUuid() . '/metrics.json', 'w');
-        fwrite($file, json_encode($metrics));
-        fclose($file);
-        $this->repoRepository->add($repo, true);
+        $this->messageBus->dispatch(new JsonFileMergeMessage($repo->getUuid()));
     }
 
     private function getIncrementor($totalHashes)

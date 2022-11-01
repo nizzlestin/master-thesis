@@ -5,28 +5,12 @@ namespace App\MessageHandler;
 use App\Message\CloneMessage;
 use App\Message\MetricMessage;
 use App\Repository\RepoRepository;
-use App\Service\AbstractMetricCalculator;
 use App\Service\GitRepositoryManager;
-use App\Service\LOCMetricCalculator;
 use DateTimeImmutable;
-use Exception;
-use phpDocumentor\Reflection\Types\Iterable_;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
-use function array_merge;
-use function fclose;
-use function fopen;
-use function fwrite;
-use function intval;
-use function iterator_to_array;
-use function json_encode;
 use function mkdir;
-use function round;
-use function sizeof;
-use function strtolower;
-use function substr;
-use const SIGKILL;
 
 #[AsMessageHandler]
 class CloneHandler
