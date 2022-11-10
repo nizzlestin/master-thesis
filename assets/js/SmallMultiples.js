@@ -20,17 +20,28 @@ export class SmallMultiples {
 
     constructor(_parentElement, _data, _config) {
         this.data = _data;
+        this.dataByLanguage = this.data;
         this.config = _config;
         this.parentElement = _parentElement;
         this.languageKeys = new Set(this.data.map(d => d.language));
         this.metricKeys = new Set(this.data.map(d => d.metric));
         this.color = d3.scaleOrdinal(d3.schemeCategory10).domain(this.languageKeys);
+
         this.#init();
     }
 
+    #filterLanguage() {
+        const vis = this;
+        let $checked = $("#options-card").find("input.language-filter:checked");
+        let languages = []
+        $checked.each((i,d) => {
+            languages.push(d.value)
+        })
+        return languages;
+    }
     update(metric) {
         const vis = this;
-        vis.dataByMetric = vis.data.filter(d => d.metric === metric)
+        vis.dataByMetric = vis.dataByLanguage.filter(d => d.metric === metric)
         const sliderValues = $(vis.slider.sliderId).slider("values");
         vis.dataByMetric = vis.dataByMetric.filter(d => {
             return ((d.date.getTime() >= sliderValues[0]) && (d.date.getTime() <= sliderValues[1]))
@@ -87,10 +98,15 @@ export class SmallMultiples {
             .attr("stroke", "white")
             .attr("stroke-width", "0.1px")
     }
-
+    rerender() {
+        const vis = this;
+        $(vis.parentElement).find("svg").remove()
+        vis.dataByLanguage = vis.data.filter(d => vis.#filterLanguage().includes(d.language))
+        vis.#init();
+    }
     #init() {
         const vis = this;
-        vis.dataByMetric = vis.data.filter(d => d.metric === vis.config.metric)
+        vis.dataByMetric = vis.dataByLanguage.filter(d => d.metric === vis.config.metric)
         const sumstat = d3.group(vis.dataByMetric, d => d.language);
         // Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
         vis.svg = d3.select(vis.parentElement)
@@ -193,7 +209,6 @@ export class SmallMultiples {
         }
         vis.min = d3.min(vis.data, (d) => d.date)
         vis.max = d3.max(vis.data, (d) => d.date)
-        console.log(vis.max, vis.min)
         $(vis.slider.firstLabelId).text(formatTime(vis.min))
         $(vis.slider.secondLabelId).text(formatTime(vis.max))
         $(vis.slider.sliderId).slider({

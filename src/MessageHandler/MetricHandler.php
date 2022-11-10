@@ -17,6 +17,7 @@ use function array_filter;
 use function array_map;
 use function array_merge;
 use function array_reduce;
+use function array_reverse;
 use function array_sum;
 use function count;
 use function end;
@@ -53,6 +54,18 @@ class MetricHandler
     }
 
     public function __invoke(MetricMessage $message): void
+    {
+        $repo = $this->repoRepository->findOneBy(['uuid' => $message->getUuid()]);
+        if (false === $repo->isCloned()) {
+            return;
+        }
+        $tmpHashes = array_reverse($this->gitRepositoryManager->getCommitHashesOfCurrent($repo));
+        $this->repoRepository->add($repo, true);
+        $hashes = [];
+        $sizeOfHashes = count($tmpHashes);
+        $increment = $this->getIncrementor($sizeOfHashes);
+    }
+    public function xxinvoke(MetricMessage $message): void
     {
         $repo = $this->repoRepository->findOneBy(['uuid' => $message->getUuid()]);
         if (false === $repo->isCloned()) {

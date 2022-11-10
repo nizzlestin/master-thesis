@@ -38,14 +38,9 @@ class RepoController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $repoOrNull = $repoRepository->findOneBy(['url' => $repo->getUrl()]);
-            if($repoOrNull !== null) {
-                return $this->redirectToRoute('app_dashboard_index');
-            }
             $repoRepository->add($repo, true);
             $bus->dispatch(new CloneMessage($repo->getUuid()));
-
-            return $this->redirectToRoute('app_repo_show', ['id' => $repo->getId()]);
+            return $this->redirectToRoute('app_dashboard_index');
         }
         return $this->renderForm('repo/new.html.twig', [
             'repo' => $repo,
@@ -70,7 +65,7 @@ class RepoController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $repoRepository->add($repo, true);
 
-            return $this->redirectToRoute('app_repo_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_dashboard_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->renderForm('repo/edit.html.twig', [

@@ -71,5 +71,26 @@ $(document).ready(() => {
         })
         res = res.flat()
         loc = new SmallMultiples("#small-multiples", res, {'metric': 'Code'});
+        var $optionsCardCardBody = $('#options-card').find('.card-body');
+        var checkboxes = []
+        languages.forEach(d => {
+            var div = document.createElement("div");
+             div.setAttribute("class", "form-check");
+            var label = document.createElement("label");
+            label.setAttribute("class", "form-check-label");
+            var input = document.createElement("input");
+            input.setAttribute("class", "form-check-input language-filter");
+            input.setAttribute("type", "checkbox");
+            input.setAttribute("value", d);
+            input.checked = 1;
+            label.innerText = d;
+            label.append(input);
+            div.append(label);
+            checkboxes.push(div);
+        })
+        $optionsCardCardBody.append(checkboxes)
+        $(":checkbox").change(function() {
+            loc.rerender();
+        })
     })
 })

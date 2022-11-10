@@ -170,4 +170,11 @@ class Repo
         $this->evaluatedCommits = $evaluatedCommits;
     }
 
+    public function setUuid(string $uuid): self
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
 }

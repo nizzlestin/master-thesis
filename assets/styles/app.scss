@@ -9,6 +9,12 @@ body {
     break-inside: avoid;
 }
 
+.cards-container .card-header {
+    min-height: 55px;
+}
+.cards-container .card-footer {
+    min-height: 77.8px;
+}
 div.slider-div {
     margin-left: 20px;
     margin-right: 20px;
@@ -26,8 +32,8 @@ input[type=radio] {
     outline: none;
     background: none;
     cursor: pointer;
-    color: #0000EE;
-    padding: 0;
+    color: black;
+    padding: 0 10px 0 0;
     text-decoration: underline;
     font-family: inherit;
     font-size: inherit;
