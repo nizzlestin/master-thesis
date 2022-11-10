@@ -59,18 +59,6 @@ class MetricHandler
         if (false === $repo->isCloned()) {
             return;
         }
-        $tmpHashes = array_reverse($this->gitRepositoryManager->getCommitHashesOfCurrent($repo));
-        $this->repoRepository->add($repo, true);
-        $hashes = [];
-        $sizeOfHashes = count($tmpHashes);
-        $increment = $this->getIncrementor($sizeOfHashes);
-    }
-    public function xxinvoke(MetricMessage $message): void
-    {
-        $repo = $this->repoRepository->findOneBy(['uuid' => $message->getUuid()]);
-        if (false === $repo->isCloned()) {
-            return;
-        }
 
         $tmpHashes = array_reverse($this->gitRepositoryManager->getCommitHashesOfCurrent($repo));
         $this->repoRepository->add($repo, true);
