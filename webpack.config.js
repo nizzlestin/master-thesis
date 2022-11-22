@@ -23,6 +23,7 @@ Encore
     .addEntry('app', './assets/app.js')
     .addEntry('visualisation', './assets/visualisation.js')
     .addEntry('small_multiples', './assets/SmallMultiples.js')
+    .addEntry('small_multiples_files', './assets/SmallMultiplesBackup.js')
     .addEntry('biplot', './assets/Biplot.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.

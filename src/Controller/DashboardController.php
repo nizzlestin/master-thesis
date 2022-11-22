@@ -2,43 +2,53 @@
 
 namespace App\Controller;
 
-use App\Entity\Repo;
-use App\Repository\RepoRepository;
+use App\Entity\Project;
+use App\Entity\Statistic;
+use App\Repository\ProjectRepository;
+use App\Repository\StatisticRepository;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/d', name: 'app_dashboard')]
+#[Route('/dashboard', name: 'app_dashboard')]
 class DashboardController extends AbstractController
 {
     #[Route('', name: '_index')]
-    public function index(Request $request, RepoRepository $repoRepository, PaginatorInterface $paginator): Response
+    public function index(Request $request, ProjectRepository $projectRepository, PaginatorInterface $paginator): Response
     {
         $pagination = $paginator->paginate(
-            $repoRepository->findBy([], ['id' => 'DESC']),
+            $projectRepository->findBy([], ['id' => 'DESC']),
             $request->query->getInt('page', 1),
             7
         );
         return $this->render('dashboard/index.html.twig', [
-            'repos' => $pagination
+            'projects' => $pagination
         ]);
     }
 
     #[Route('/small-multiples/{id}', name: '_small_multiples', methods: ['GET'])]
-    public function smallMultiples(Repo $repo): Response
+    public function smallMultiples(Project $project): Response
     {
-        return $this->render('repo/prototype.html.twig', [
-            'repo' => $repo,
+        return $this->render('project/prototype.html.twig', [
+            'project' => $project
+        ]);
+    }
+
+    #[Route('/small-multiples-by-file/{id}', name: '_small_multiples_by_file', methods: ['GET'])]
+    public function smallMultiples2(Project $project): Response
+    {
+        return $this->render('project/prototype2.html.twig', [
+            'project' => $project
         ]);
     }
 
     #[Route('/biplot/{id}', name: '_biplot', methods: ['GET'])]
-    public function biplot(Repo $repo): Response
+    public function biplot(Project $project): Response
     {
-        return $this->render('repo/biplot.html.twig', [
-            'repo' => $repo,
+        return $this->render('project/biplot.html.twig', [
+            'project' => $project,
         ]);
     }
 }

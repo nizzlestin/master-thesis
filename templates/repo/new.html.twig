@@ -1,8 +1,0 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}New Repo{% endblock %}
-
-{% block body %}
-    {{ include('repo/_form.html.twig', {title: 'Create new Repo', form: form}) }}
-    <a href="{{ path('app_dashboard_index') }}">back to list</a>
-{% endblock %}

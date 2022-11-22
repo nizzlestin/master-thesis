@@ -7,7 +7,7 @@ import $ from "jquery";
 const parseTime = d3.timeParse("%d/%m/%Y");
 const formatTime = d3.timeFormat("%d/%m/%Y");
 
-export class SmallMultiples {
+export class SmallMultiplesBackup {
     glines
     mouseG
     tooltip
@@ -20,34 +20,34 @@ export class SmallMultiples {
     currentValue = null
     constructor(_parentElement, _data, _config) {
         this.data = _data;
-        this.dataByLanguage = this.data;
+        this.dataByCategory = this.data;
         this.config = _config;
         this.parentElement = _parentElement;
-        this.languageKeys = new Set(this.data.map(d => d.language));
+        this.categoryKeys = new Set(this.data.map(d => d.category));
         this.metricKeys = new Set(this.data.map(d => d.metric));
-        this.color = d3.scaleOrdinal(d3.schemeCategory10).domain(this.languageKeys);
+        this.color = d3.scaleOrdinal(d3.schemeCategory10).domain(this.categoryKeys);
 
         this.#init();
     }
 
-    #filterLanguage() {
+    #filterCategory() {
         const vis = this;
-        let $checked = $("#options-card").find("input.language-filter:checked");
-        let languages = []
+        let $checked = $("#options-card").find("input.category-filter:checked");
+        let categories = []
         $checked.each((i,d) => {
-            languages.push(d.value)
+            categories.push(d.value)
         })
-        return languages;
+        return categories;
     }
     update() {
         const vis = this;
         const metric = vis.currentValue
-        vis.dataByMetric = vis.dataByLanguage.filter(d => d.metric === metric)
+        vis.dataByMetric = vis.dataByCategory.filter(d => d.metric === (vis.currentValue !== null? vis.currentValue : vis.config.metric))
         const sliderValues = $(vis.slider.sliderId).slider("values");
         vis.dataByMetric = vis.dataByMetric.filter(d => {
             return ((d.date.getTime() >= sliderValues[0]) && (d.date.getTime() <= sliderValues[1]))
         })
-        const sumstat = d3.group(vis.dataByMetric, d => d.language);
+        const sumstat = d3.group(vis.dataByMetric, d => d.category);
         const x = d3.scaleTime()
             .domain(d3.extent(vis.dataByMetric, function (d) {
                 return d.date;
@@ -93,7 +93,7 @@ export class SmallMultiples {
             .attr("class", "points")
             .attr("cx", d => x(d.date))
             .attr("cy", d => y(d.value))
-            .style("fill", d => vis.color(d.language))
+            .style("fill", d => vis.color(d.category))
             .attr("r", 2)
             .attr("stroke", "white")
             .attr("stroke-width", "0.1px")
@@ -101,14 +101,14 @@ export class SmallMultiples {
     rerender() {
         const vis = this;
         $(vis.parentElement).find("svg").remove()
-        let languageFilter = vis.#filterLanguage()
-        vis.dataByLanguage = vis.data.filter(d => languageFilter.includes(d.language))
+        let filterCat = vis.#filterCategory();
+        vis.dataByCategory = vis.data.filter(d => filterCat.includes(d.category))
         vis.#init();
     }
     #init() {
         const vis = this;
-        vis.dataByMetric = vis.dataByLanguage.filter(d => d.metric === (vis.currentValue !== null? vis.currentValue : vis.config.metric))
-        const sumstat = d3.group(vis.dataByMetric, d => d.language);
+        vis.dataByMetric = vis.dataByCategory.filter(d => d.metric === vis.config.metric)
+        const sumstat = d3.group(vis.dataByMetric, d => d.category);
         // Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
         vis.svg = d3.select(vis.parentElement)
             .selectAll("uniqueChart")
@@ -177,7 +177,7 @@ export class SmallMultiples {
             .attr("class", "points")
             .attr("cx", d => x(d.date))
             .attr("cy", d => y(d.value))
-            .style("fill", d => vis.color(d.language))
+            .style("fill", d => vis.color(d.category))
             .attr("r", 2)
             .attr("stroke", "white")
             .attr("stroke-width", "0.1px")

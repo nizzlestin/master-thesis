@@ -18,6 +18,7 @@ framework:
         routing:
             App\Message\CloneMessage: async
             App\Message\MetricMessage: async
-            App\Message\JsonFileMergeMessage: async
+            App\Message\CleanupFilesystemMessage: async
+            App\Message\GrowthRateMessage: async
             # Route your messages to the transports
             # 'App\Message\YourMessage': async

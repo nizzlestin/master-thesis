@@ -1,18 +1,18 @@
 import './styles/app.scss';
 import $ from 'jquery';
 
-import {SmallMultiples} from "./js/SmallMultiples";
+import {SmallMultiplesBackup} from "./js/SmallMultiplesBackup";
 import * as d3 from 'd3';
 
 const parseTime = d3.timeParse("%d/%m/%Y");
 let loc;
 
 $(document).ready(() => {
-    function makeDict(d, m, v, l, h, axis) {
-        return {date: parseTime(d), metric: m, value: v, language: l, hash: h, axis: axis};
+    function makeDict(d, m, v, c, h) {
+        return {date: parseTime(d), metric: m, value: v, category: c, hash: h};
     }
-    function makeEmtpyEntryWithLanguage(h, l, d) {
-        return {commit_date: d, commit: h, language: l, bytes: 0, lines: 0, code: 0, comment: 0, blank: 0, complexity: 0, count: 0 }
+    function makeEmtpyEntryWithCategory(h, l, d, f = "") {
+        return {commit_date: d, commit: h, language: l, bytes: 0, lines: 0, code: 0, comment: 0, blank: 0, complexity: 0, count: 0, file: f }
     }
 
     var groupBy = function (xs, key) {
@@ -23,53 +23,51 @@ $(document).ready(() => {
     };
     const asset = $('[data-asset-url]').data('asset-url');
     d3.json(asset).then((data) => {
-        var languages = [...new Set(data.map(d => d.language))];
-        var languageLength = languages.length
+
+        var categories = [...new Set(data.map(d => d.file))];
+        var categoryLength = categories.length
         data = data.reverse()
 
         var data2 = groupBy(data, 'commit')
         var finalData = []
         for (const [key, value] of Object.entries(data2)) {
-            if (value.length !== languageLength) {
-                const entryLanguages = [...new Set(value.map(d => d.language))];
-                const filteredArray = languages.filter(v => !entryLanguages.includes(v));
+            if (value.length !== categoryLength) {
+                const entryCategories = [...new Set(value.map(d => d.file))];
+                const filteredArray = categories.filter(v => !entryCategories.includes(v));
                 filteredArray.forEach(l => {
-                    finalData.push(makeEmtpyEntryWithLanguage(key, l, value[0].commit_date))
+
+                    finalData.push(makeEmtpyEntryWithCategory(key, l, value[0].commit_date, l))
                 })
             }
 
             value.forEach(existingV => finalData.push(existingV))
         }
 
-
         var res = finalData.map((d, i) => {
             var ratio = Math.round(d.code*100 / (d.comment + d.code))/100;
             var ltoc = ratio ? ratio : 1.0;
-            ltoc = ltoc*100
             let complexityPerLine = Math.round(d.complexity*100/d.code)/100;
             complexityPerLine = complexityPerLine ? complexityPerLine : 0.0
+
+            ltoc = ltoc*100
             return [
-                makeDict(d.commit_date, 'Code', d.code, d.language, d.commit, {y : 'SLOC', x: 'Time'}),
-                makeDict(d.commit_date, 'ltocratio', ltoc, d.language, d.commit, {y : 'CC', x: 'Time'}),
-                makeDict(d.commit_date, 'StatComplexity', complexityPerLine, d.language, d.commit, {y : 'Complexity per Line', x: 'Time'}),
-                makeDict(d.commit_date, 'Complexity', d.complexity, d.language, d.commit, {y : 'SLOC', x: 'Time'}),
+                makeDict(d.commit_date, 'Code', d.code, d.file, d.commit),
+                makeDict(d.commit_date, 'ltocratio', ltoc, d.file, d.commit),
+                makeDict(d.commit_date, 'StatComplexity', complexityPerLine, d.file, d.commit),
+                makeDict(d.commit_date, 'Complexity', d.complexity, d.file, d.commit),
             ]
         })
-
         res = res.flat()
-        res.sort((a,b) => {
-            return d3.ascending(a.language, b.language)
-        })
-        loc = new SmallMultiples("#small-multiples", res, {'metric': 'Code'});
+        loc = new SmallMultiplesBackup("#small-multiples", res, {'metric': 'Code'});
         var $optionsCardCardBody = $('#options-card').find('.card-body');
         var checkboxes = []
-        languages.forEach(d => {
+        categories.forEach(d => {
             var div = document.createElement("div");
-             div.setAttribute("class", "form-check");
+            div.setAttribute("class", "form-check");
             var label = document.createElement("label");
             label.setAttribute("class", "form-check-label");
             var input = document.createElement("input");
-            input.setAttribute("class", "form-check-input language-filter");
+            input.setAttribute("class", "form-check-input category-filter");
             input.setAttribute("type", "checkbox");
             input.setAttribute("value", d);
             input.checked = 1;

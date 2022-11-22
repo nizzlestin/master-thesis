@@ -2,28 +2,59 @@
 
 namespace App\Service;
 
-use App\Entity\Repo;
+use App\Entity\Project;
 use App\Model\FileExtensions;
+use App\Repository\ProjectRepository;
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Process\Process;
 use function json_decode;
+use function sprintf;
+use function substr;
 
 class SccMetricCalculator extends AbstractMetricCalculator
 {
-    public function execute(Repo $repo, string $output = "out.json", int $timeout = null): array
+    private EntityManagerInterface $entityManager;
+
+    public function __construct(ParameterBagInterface $parameterBag, ProjectRepository $projectRepository, EntityManagerInterface $entityManager)
     {
-        $id = $repo->getUuid();
-        $process = new Process(['scc', '--no-gen', '--no-cocomo', '--by-file', '--format', 'json', '--include-ext', FileExtensions::asString()], $this->parameterBag->get('app.repo_dir') . "/$id/repo/");
+        parent::__construct($parameterBag, $projectRepository);
+        $this->entityManager = $entityManager;
+    }
+
+    public function execute(Project $project, string $output = "out.json", string $commit = '', DateTime $date = null, int $timeout = null): array
+    {
+        $id = $project->getUuid();
+        $out =
+        $process = new Process(
+            [
+                'scc',
+                '--no-gen',
+                '--no-cocomo',
+                '--format=csv',
+                '--by-file',
+                '--sql-commit',
+                $commit,
+                '--sql-project',
+                $project->getId(),
+                '--include-ext',
+                FileExtensions::asString(),
+                '--sql-date',
+                $date? $date->format('Y-m-d H:i:s'): "",
+                '--output',
+                substr($commit, 0, 15),
+            ],
+            $this->parameterBag->get('app.project_dir') . "/$id/repo/"
+        );
         if ($timeout !== null) {
             $process->setTimeout($timeout);
         }
+
         $process->run();
-        return is_array(json_decode($process->getOutput(), true)) ? json_decode($process->getOutput(), true) : [];
-    }
-
-    public function reformatAndStore(array $result)
-    {
-
+        $this->entityManager->getConnection()->executeStatement(sprintf("LOAD DATA local infile '%s' INTO TABLE statistic COLUMNS TERMINATED BY ','", $this->parameterBag->get('app.project_dir') . "/$id/repo/".substr($commit, 0, 15)));
+        return [];
     }
 
     public function getName(): string

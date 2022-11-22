@@ -1,0 +1,44 @@
+{% extends 'base_view.html.twig' %}
+
+{% import 'marcos/common.html.twig' as common %}
+{% block title %}Project{% endblock %}
+
+{% block navbarlinks %}
+    <a class="navbar-brand ps-3" href="{{ path('app_home') }}">GROV/i/Z</a>
+    <a class="" href="{{ path('app_dashboard_small_multiples', { id : project.id }) }}">Multiple File View&nbsp</a>
+    <a class="" href="{{ path('app_dashboard_small_multiples_by_file', { id : project.id }) }}">Top 10 File
+        Complexity</a>
+    <a role="link" aria-disabled="true" style="color:white; padding-right: 10px">Churn - Complexity Biplot&nbsp</a>
+{% endblock %}
+{% block body %}
+    <div data-uuid="{{ project.uuid }}"
+         data-asset-url="{{ path('app_metricscode_churn', {'project': project.id}) }}"></div>
+    <div class="cards-container">
+        <div class="row">
+            <div class="col-6">
+                <div class="card h-100 mt-2" id="options-card">
+                    <div class="card-header text-center">
+                        <h5>Churn-Complexity-Biplot for {{ project.url }}</h5>
+                    </div>
+                    <div id="biplot" class="card-body text-center">
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card h-100 mt-2" id="options-card">
+                    <div class="card-header">
+                        <h5 id="timeline-h5"></h5>
+                    </div>
+                    <div id="small-multiples" class="card-body text-center">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('biplot') }}
+    {{ encore_entry_link_tags('biplot') }}
+{% endblock %}

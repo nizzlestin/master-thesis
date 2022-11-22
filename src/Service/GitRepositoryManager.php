@@ -4,61 +4,58 @@
 namespace App\Service;
 
 
-use App\Entity\Repo;
-use App\Repository\RepoRepository;
+use App\Entity\Project;
+use App\Repository\ProjectRepository;
 use DateTimeImmutable;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Process\Process;
 use function explode;
 use function intval;
+use function removeTrailingWhitespace;
 
 class GitRepositoryManager
 {
-    private RepoRepository $repoRepository;
+    private ProjectRepository $projectRepository;
 
-    public function __construct(ParameterBagInterface $parameterBag, RepoRepository $repoRepository)
+    public function __construct(ParameterBagInterface $parameterBag, ProjectRepository $projectRepository)
     {
         $this->parameterBag = $parameterBag;
-        $this->repoRepository = $repoRepository;
+        $this->projectRepository = $projectRepository;
     }
 
-    public function cloneGitRepository(Repo $repo, int $timeout = null): Process {
+    public function cloneGitRepository(Project $project, int $timeout = null): Process {
         $clonedAt = new DateTimeImmutable();
-        $process = new Process(['git', 'clone', $repo->getUrl(), 'repo'], $this->cwd($repo->getUuid()));
+        $process = new Process(['git', 'clone', $project->getUrl(), 'repo'], $this->cwd($project->getUuid()));
         if($timeout !== null) {
             $process->setTimeout($timeout);
         }
         $process->run();
         if($process->isSuccessful()) {
-            $repo->setCloned(true);
-            $repo->setClonedAt($clonedAt);
-            $repo->setTotalCommits($this->getRevisionCount($repo));
-            $this->repoRepository->add($repo, true);
+            $project->setCloned(true);
+            $project->setClonedAt($clonedAt);
+            $project->setTotalCommits($this->getRevisionCount($project));
+            $this->projectRepository->add($project, true);
         }
         return $process;
     }
 
-    private function getRevisionCount(Repo $repo): int {
+    private function getRevisionCount(Project $project): int {
         $cmd = explode(' ', 'git rev-list --count HEAD');
-        $process = new Process($cmd, $this->repo($repo->getUuid()));
+        $process = new Process($cmd, $this->project($project->getUuid()));
         $process->run();
         echo $process->getOutput();
         return intval($process->getOutput());
     }
 
-    public function checkoutCommit(Repo $repo, string $hash) {
-//        $process = new Process(['git', 'reset', '--hard', $hash], $this->repo($repo->getUuid()));
-//        $process = new Process(['git', 'checkout', '-b', 'b_'.substr($hash, 0, 7), $hash], $this->repo($repo->getUuid()));
-        $process = new Process(['git', 'checkout', $hash], $this->repo($repo->getUuid()));
-        $process->run(function ($type, $buffer) {
-//            echo $buffer."\n";
-        });
+    public function checkoutCommit(Project $project, string $hash) {
+        $process = new Process(['git', 'checkout', $hash], $this->project($project->getUuid()));
+        $process->run();
         return $process;
     }
 
-    public function getCommitHashesOfCurrent(Repo $repo): array {
-        $cmd = explode(' ', 'git --no-pager log --pretty=format:"%H,%ci,%cE" --no-merges');
-        $process = new Process($cmd, $this->repo($repo->getUuid()));
+    public function getCommitHashesOfCurrent(Project $project): array {
+        $cmd = explode(' ', 'git --no-pager log --pretty=format:"%H,%ci,%cE" --first-parent');
+        $process = new Process($cmd, $this->project($project->getUuid()));
         $process->run();
         $cleanedOutput = str_replace('"','',$process->getOutput());
         $xs = explode("\n", $cleanedOutput);
@@ -69,11 +66,15 @@ class GitRepositoryManager
         return $out;
     }
 
-    private function cwd(string $subdir): string {
-        return $this->parameterBag->get('app.repo_dir').'/'.$subdir;
+    public function getTotalCommitsByDeveloper(Project $project) {
+
     }
 
-    private function repo(string $subdir): string {
+    public function cwd(string $subdir): string {
+        return $this->parameterBag->get('app.project_dir').'/'.$subdir;
+    }
+
+    public function project(string $subdir): string {
         return $this->cwd($subdir).'/repo';
     }
 }

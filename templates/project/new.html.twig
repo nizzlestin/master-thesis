@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Project{% endblock %}
+
+{% block body %}
+    {{ include('project/_form.html.twig', {title: 'Create new Project', form: form}) }}
+    <a href="{{ path('app_dashboard_index') }}">back to list</a>
+{% endblock %}

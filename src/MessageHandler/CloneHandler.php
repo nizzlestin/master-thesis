@@ -4,7 +4,7 @@ namespace App\MessageHandler;
 
 use App\Message\CloneMessage;
 use App\Message\MetricMessage;
-use App\Repository\RepoRepository;
+use App\Repository\ProjectRepository;
 use App\Service\GitRepositoryManager;
 use DateTimeImmutable;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -16,14 +16,14 @@ use function mkdir;
 class CloneHandler
 {
     private GitRepositoryManager $gitRepositoryManager;
-    private RepoRepository $repoRepository;
+    private ProjectRepository $projectRepository;
     private ParameterBagInterface $parameterBag;
     private MessageBusInterface $bus;
 
-    public function __construct(MessageBusInterface $bus, GitRepositoryManager $gitRepositoryManager, RepoRepository $repoRepository, ParameterBagInterface $parameterBag)
+    public function __construct(MessageBusInterface $bus, GitRepositoryManager $gitRepositoryManager, ProjectRepository $projectRepository, ParameterBagInterface $parameterBag)
     {
         $this->gitRepositoryManager = $gitRepositoryManager;
-        $this->repoRepository = $repoRepository;
+        $this->projectRepository = $projectRepository;
         $this->parameterBag = $parameterBag;
         $this->bus = $bus;
     }
@@ -31,17 +31,15 @@ class CloneHandler
 
     public function __invoke(CloneMessage $cloneMessage)
     {
-        $repo = $this->repoRepository->findOneBy(['uuid' => $cloneMessage->getUuid()]);
-        $repo->setCloned(false);
-        $this->repoRepository->add($repo, true);
+        $project = $this->projectRepository->findOneBy(['uuid' => $cloneMessage->getUuid()]);
+        $this->projectRepository->add($project, true);
 
-        mkdir($this->parameterBag->get('app.repo_dir') . '/' . $repo->getUuid());
-        $cloneProcess = $this->gitRepositoryManager->cloneGitRepository($repo, 1800);
+        mkdir($this->parameterBag->get('app.project_dir') . '/' . $project->getUuid());
+        $cloneProcess = $this->gitRepositoryManager->cloneGitRepository($project, 1800);
         if ($cloneProcess->isSuccessful()) {
-            $repo->setCloned(true);
-            $repo->setClonedAt(new DateTimeImmutable());
-            $this->repoRepository->add($repo, true);
-            $this->bus->dispatch(new MetricMessage($repo->getUuid()));
+            $project->setClonedAt(new DateTimeImmutable());
+            $this->projectRepository->add($project, true);
+            $this->bus->dispatch(new MetricMessage($project->getUuid()));
         }
     }
 }

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Repo index{% endblock %}
+{% block title %}Project index{% endblock %}
 
 {% block body %}
     <div class="row">
@@ -8,24 +8,37 @@
             <div class="card mt-4">
                 <div class="card-header">
                     <i class="fa-brands fa-github me-1"></i>
-                    Repository Index
+                    Project Index
                 </div>
                 <div class="card-body">
                     <table class="table">
                         <thead>
                         <tr>
-                            <th>{{ knp_pagination_sortable(repos, 'Url', 'url') }}</th>
+                            <th>{{ knp_pagination_sortable(projects, 'Url', 'url') }}</th>
+                            <th>#Commits</th>
+                            <th>Status</th>
+                            <th>Cloned at</th>
                             <th>actions</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for repo in repos %}
+                        {% for project in projects %}
                             <tr>
-                                <td>{{ repo.url }}</td>
+                                <td>{{ project.url }}</td>
+                                <td>{{ project.totalCommits }}</td>
+                                <td>{{ project.status }}</td>
+                                <td>{{ project.clonedAt|date('Y-M-d') }}</td>
                                 <td>
-                                    <a href="{{ path('app_dashboard_small_multiples', {'id': repo.id}) }}"><i class="fa-solid fa-chart-line"></i></a>
-                                    <a href="{{ path('app_dashboard_small_multiples', {'id': repo.id}) }}"><i class="fa-solid fa-repeat"></i></a>
-                                    {{ include('repo/_delete_form.html.twig', {repo: repo}) }}
+                                    {% if project.status != 'done' %}
+                                        <span><i class="fa-solid fa-chart-line"></i></span>
+                                        {{ include('project/_delete_form.html.twig', {project: project}) }}
+                                        <span><i class="fa-solid fa-spinner fa-spin"></i></span>
+                                    {% else %}
+                                        <a href="{{ path('app_dashboard_small_multiples', {'id': project.id}) }}"><i class="fa-solid fa-chart-line"></i></a>
+                                        {#                                    <a href="{{ path('app_dashboard_small_multiples_by_file', {'id': project.id}) }}"><i class="fa-solid fa-package"></i></a>#}
+                                        {{ include('project/_delete_form.html.twig', {project: project}) }}
+                                    {% endif %}
+
                                 </td>
                             </tr>
                         {% else %}
@@ -36,11 +49,11 @@
                         </tbody>
                     </table>
                     <div class="navigation">
-                        {{ knp_pagination_render(repos) }}
+                        {{ knp_pagination_render(projects) }}
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ path('app_repo_new') }}">Create new</a>
+                    <a href="{{ path('app_project_new') }}">Create new</a>
                 </div>
             </div>
         </div>

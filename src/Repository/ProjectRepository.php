@@ -2,23 +2,23 @@
 
 namespace App\Repository;
 
-use App\Entity\Statistic;
+use App\Entity\Project;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Statistic>
+ * @extends ServiceEntityRepository<Project>
  *
- * @method Statistic|null find($id, $lockMode = null, $lockVersion = null)
- * @method Statistic|null findOneBy(array $criteria, array $orderBy = null)
- * @method Statistic[]    findAll()
- * @method Statistic[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Project|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Project|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Project[]    findAll()
+ * @method Project[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class StatisticRepository extends ServiceEntityRepository
+class ProjectRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Statistic::class);
+        parent::__construct($registry, Project::class);
     }
 
     public function add(Project $entity, bool $flush = false): void
@@ -32,8 +32,14 @@ class StatisticRepository extends ServiceEntityRepository
 
     public function remove(Project $entity, bool $flush = false): void
     {
+        $conn = $this->getEntityManager()->getConnection();
+        $deleteStatisticStmt = $conn->prepare("DELETE FROM statistic WHERE project_id = :projectId");
+        $deleteStatisticStmt->executeStatement(['projectId' => $entity->getId()]);
+        $deleteStatisticStmt = $conn->prepare("DELETE FROM file_churn WHERE project_id = :projectId");
+        $deleteStatisticStmt->executeStatement(['projectId' => $entity->getId()]);
+        $deleteStatisticFileStmt = $conn->prepare("DELETE FROM statistic_file WHERE project_id = :projectId");
+        $deleteStatisticFileStmt->executeStatement(['projectId' => $entity->getId()]);
         $this->getEntityManager()->remove($entity);
-
         if ($flush) {
             $this->getEntityManager()->flush();
         }
