@@ -3,12 +3,17 @@
 namespace App\Entity;
 
 use App\Repository\StatisticRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: StatisticRepository::class)]
 #[ORM\Index(fields: ["commit"], name: "commit_idx")]
 #[ORM\Index(fields: ["file"], name: "file_idx")]
+#[ORM\Index(fields: ["fileBasename"], name: "file_base_idx")]
+#[ORM\Index(fields: ["project", "fileBasename"], name: "project_file_base_idx")]
 #[ORM\Index(fields: ["project"], name: "project_idx")]
+#[ORM\Index(fields: ["project", "commit"], name: "project_commit_idx")]
+#[ORM\Index(fields: ["commitDate"], name: "date_idx")]
 class Statistic
 {
     #[ORM\Id]
@@ -17,22 +22,16 @@ class Statistic
     private int $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private string $project;
-
-    #[ORM\Column(type: 'string', length: 255)]
     private $commit;
 
     #[ORM\Column(type: 'string', length: 255)]
     private $language;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $file;
-
-    #[ORM\Column(type: 'string', length: 255)]
-    private $fileDirname;
-
-    #[ORM\Column(type: 'string', length: 255)]
     private $fileBasename;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private $file;
 
     #[ORM\Column(type: 'integer', nullable: true)]
     private $byte;
@@ -49,6 +48,12 @@ class Statistic
     #[ORM\Column(type: 'integer', nullable: true)]
     private $complexity;
 
+    #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'statistics')]
+    #[ORM\JoinColumn(nullable: false)]
+    private $project;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private DateTime $commitDate;
     public function getId(): int
     {
         return $this->id;
@@ -164,4 +169,13 @@ class Statistic
         $this->complexity = $complexity;
     }
 
+    public function getCommitDate(): DateTime
+    {
+        return $this->commitDate;
+    }
+
+    public function setCommitDate(DateTime $commitDate): void
+    {
+        $this->commitDate = $commitDate;
+    }
 }

@@ -19,8 +19,8 @@ class FileExtensions
     public const COBOL = 'cob,cbl,ccp,cobol,cpy';
     public const COFFEESCRIPT = 'coffee';
     public const DART = 'dart';
-//    public const ELIXIR = 'ex,exs';
-//    public const ELM = 'elm';
+    public const ELIXIR = 'ex,exs';
+    public const ELM = 'elm';
     public const GO = 'go';
     public const HASKELL = 'hs';
     public const JAVA = 'java';
@@ -44,34 +44,34 @@ class FileExtensions
         return [
             self::ABAP,
             self::ADA,
-//            self::ASP,
-//            self::ASP_NET,
-//            self::BASIC,
+            self::ASP,
+            self::ASP_NET,
+            self::BASIC,
             self::C,
-//            self::C_HEADER,
+            self::C_HEADER,
             self::C_SHARP,
             self::CPP,
-//            self::CPP_HEADER,
-//            self::COBOL,
+            self::CPP_HEADER,
+            self::COBOL,
             self::COFFEESCRIPT,
             self::DART,
-//            self::ELIXIR,
-//            self::ELM,
+            self::ELIXIR,
+            self::ELM,
             self::GO,
-//            self::HASKELL,
+            self::HASKELL,
             self::JAVA,
             self::JAVASCRIPT,
-//            self::JSX,
+            self::JSX,
             self::JULIA,
-//            self::KOTLIN,
-//            self::LUA,
+            self::KOTLIN,
+            self::LUA,
             self::OBJECTIVE_C,
-//            self::PASCAL,
+            self::PASCAL,
             self::PERL,
             self::PHP,
             self::PYTHON,
             self::R,
-//            self::RUBY,
+            self::RUBY,
             self::RUST,
             self::SWIFT,
             self::TYPESCRIPT

@@ -1,0 +1,111 @@
+{% extends 'base_view.html.twig' %}
+
+{% import 'marcos/common.html.twig' as common %}
+{% block title %}Project{% endblock %}
+
+{% block navbarlinks %}
+    <a class="navbar-brand ps-3" href="{{ path('app_home') }}">GROV/i/Z</a>
+    <a role="link" aria-disabled="true" style="color:white; padding-right: 10px">Multiple File View&nbsp</a>
+    <a class="" href="{{ path('app_dashboard_small_multiples_by_file', { id : project.id }) }}">Top 10 File Complexity</a>
+    <a class="ps-3" href="{{ path('app_dashboard_biplot', { id : project.id }) }}">Churn - Complexity Biplot</a>
+{% endblock %}
+{% block body %}
+    <div data-uuid="{{ project.uuid }}" data-asset-url="{{ path('app_metricsby_project', {'project': project.id}) }}"></div>
+    <div class="cards-container">
+        <div class="row">
+            <div class="col-2">
+                <div class="card h-100 mt-2" id="options-card">
+                    <div class="card-header text-center">Filter Options</div>
+                    <div class="card-body"></div>
+                    <div class="card-footer"></div>
+                </div>
+            </div>
+            <div class="col-10">
+                {{ common.smallMultiples('small-multiples', project.url) }}
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        var ContainerElements = ["svg", "g"];
+        var RelevantStyles = {
+            "rect": ["fill", "stroke", "stroke-width"],
+            "path": ["fill", "stroke", "stroke-width"],
+            "circle": ["fill", "stroke", "stroke-width"],
+            "line": ["stroke", "stroke-width"],
+            "text": ["fill", "font-size", "text-anchor"],
+            "polygon": ["stroke", "fill"]
+        };
+
+
+        function readElement(ParentNode, OrigData) {
+            var Children = ParentNode.childNodes;
+            var OrigChildDat = OrigData.childNodes;
+
+            for (var cd = 0; cd < Children.length; cd++) {
+                var Child = Children[cd];
+
+                var TagName = Child.tagName;
+                if (ContainerElements.indexOf(TagName) != -1) {
+                    readElement(Child, OrigChildDat[cd])
+                } else if (TagName in RelevantStyles) {
+                    var StyleDef = window.getComputedStyle(OrigChildDat[cd]);
+
+                    var StyleString = "";
+                    for (var st = 0; st < RelevantStyles[TagName].length; st++) {
+                        StyleString += RelevantStyles[TagName][st] + ":" + StyleDef.getPropertyValue(RelevantStyles[TagName][st]) + "; ";
+
+                    }
+                    if(TagName === "text") {
+                        var fontFamily =  'Arial, Helvetica, sans-serif';
+                        Child.setAttribute("font-family", fontFamily);
+                    }
+                    Child.setAttribute("style", StyleString);
+
+                }
+            }
+
+        }
+
+        function exportStyledSVG(SVGElem) {
+            var oDOM = SVGElem.cloneNode(true)
+            readElement(oDOM, SVGElem)
+
+            var data = new XMLSerializer().serializeToString(oDOM);
+            var svg = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
+            var url = URL.createObjectURL(svg);
+
+            var link = document.createElement("a");
+            link.setAttribute("target", "_blank");
+            var Text = document.createTextNode("Export");
+        }
+
+
+        function buttonAction() {
+            const chartSpace = document.querySelector('#small-multiples')
+            const svgs = chartSpace.querySelectorAll('svg')
+            // const svgs = document.querySelectorAll('svg');
+            var i = 0;
+            svgs.forEach(SVGElem => {
+                const oDOM = SVGElem.cloneNode(true)
+                readElement(oDOM, SVGElem)
+                const base64doc = btoa(unescape(encodeURIComponent(oDOM.outerHTML)));
+                const a = document.createElement('a');
+                const e = new MouseEvent('click');
+                a.download = 'download'+i+'.svg';
+                i++;
+                a.href = 'data:image/svg+xml;base64,' + base64doc;
+                a.dispatchEvent(e);
+            })
+            i = 0;
+        }
+        const downloadSVG = document.getElementById('downloadSVG');
+        downloadSVG.addEventListener('click', buttonAction);
+    </script>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('small_multiples') }}
+    {{ encore_entry_link_tags('small_multiples') }}
+{% endblock %}

@@ -2,66 +2,50 @@
 
 namespace App\MessageHandler;
 
-use App\Message\JsonFileMergeMessage;
+use App\Entity\FileChurn;
+use App\Entity\Project;
+use App\Message\CleanupFilesystemMessage;
 use App\Message\MetricMessage;
-use App\Repository\RepoRepository;
+use App\Repository\ProjectRepository;
 use App\Service\AbstractMetricCalculator;
 use App\Service\GitRepositoryManager;
 use App\Service\SccMetricCalculator;
 use DateTime;
-use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
-use function array_filter;
-use function array_map;
-use function array_merge;
-use function array_reduce;
-use function array_reverse;
-use function array_sum;
-use function count;
-use function end;
-use function fclose;
-use function fopen;
-use function fwrite;
-use function intval;
-use function is_array;
-use function is_float;
-use function json_encode;
-use function key;
-use function max;
-use function memory_get_usage;
-use function round;
-use function sort;
-use function sprintf;
+use Symfony\Component\Process\Process;
+use function explode;
+use function strlen;
 
 #[AsMessageHandler]
 class MetricHandler
 {
-    private RepoRepository $repoRepository;
+    private ProjectRepository $projectRepository;
     private GitRepositoryManager $gitRepositoryManager;
     private ParameterBagInterface $parameterBag;
     private MessageBusInterface $messageBus;
     private SccMetricCalculator $calculator;
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(MessageBusInterface $messageBus, SccMetricCalculator $calculator, GitRepositoryManager $gitRepositoryManager, RepoRepository $repoRepository, ParameterBagInterface $parameterBag)
+    public function __construct(EntityManagerInterface $entityManager, MessageBusInterface $messageBus, SccMetricCalculator $calculator, GitRepositoryManager $gitRepositoryManager, ProjectRepository $projectRepository, ParameterBagInterface $parameterBag)
     {
         $this->gitRepositoryManager = $gitRepositoryManager;
-        $this->repoRepository = $repoRepository;
+        $this->projectRepository = $projectRepository;
         $this->parameterBag = $parameterBag;
         $this->messageBus = $messageBus;
         $this->calculator = $calculator;
+        $this->entityManager = $entityManager;
     }
 
     public function __invoke(MetricMessage $message): void
     {
-        $repo = $this->repoRepository->findOneBy(['uuid' => $message->getUuid()]);
-        if (false === $repo->isCloned()) {
-            return;
-        }
+        $project = $this->projectRepository->findOneBy(['uuid' => $message->getUuid()]);
+        $this->storeCodeChurn($project);
+        $tmpHashes = array_reverse($this->gitRepositoryManager->getCommitHashesOfCurrent($project));
+        $this->projectRepository->add($project, true);
 
-        $tmpHashes = array_reverse($this->gitRepositoryManager->getCommitHashesOfCurrent($repo));
-        $this->repoRepository->add($repo, true);
         $hashes = [];
         $sizeOfHashes = count($tmpHashes);
         $increment = $this->getIncrementor($sizeOfHashes);
@@ -70,64 +54,28 @@ class MetricHandler
         for ($c = 0; $c < $sizeOfHashes; $c += $increment) {
             $hashes[] = $tmpHashes[$c];
         }
-        $lastElementKey = array_key_last($hashes);
+        $hash = null;
         foreach ($hashes as $index => $h) {
             $hash = $h[0];
             $date = $h[1];
             $committerMail = $h[2];
-            $dateTime = new DateTimeImmutable($date);
-            $this->gitRepositoryManager->checkoutCommit($repo, $hash);
+            $dateTime = new DateTime($date);
+            $this->gitRepositoryManager->checkoutCommit($project, $hash);
             /** @var AbstractMetricCalculator $calculator */
-            $result = $this->calculator->execute($repo, $i.".json",1800);
-            $innerLastElementKey = array_key_last($result);
-            foreach ($result as $innerIndex => $metric) {
-                $language = $metric['Name'];
-                unset($metric['Name']);
-                $files = $metric['Files'];
-                $max = 0;
-                $maxFile = null;
-                foreach ($files as $file) {
-                    $complexity = $file['Complexity'];
-                    if ($complexity > $max) {
-                        $maxFile = $file;
-                        $max = $complexity;
-                        $metric['max'] = $max;
-                        $metric['maxFile'] = $maxFile['Filename'];
-                    } else {
-                        $metric['max'] = 0;
-                        $metric['maxFile'] = null;
-                    }
-                }
-                $complexities = array_map(function ($f) {
-                    return $f['Complexity'] ?? 0;
-                }, $files);
-                $average = $this->array_average($complexities);
-                $median = $this->array_median($complexities);
-                $metric['median'] = $median;
-                $metric['average'] = $average;
-                unset($metric['Files']);
-                $tmpMetric = array_merge(['date' => $dateTime->format('d/m/Y'), 'hash' => $hash, 'committer' => $committerMail, 'language' => $language], $metric);
-                $file = fopen($this->parameterBag->get('app.repo_dir') . '/' . $repo->getUuid() . '/'.$i.'.jsontmp', 'w');
-                if($index == $lastElementKey && $innerIndex == $innerLastElementKey) {
-                    fwrite($file, json_encode($tmpMetric));
-                }
-                else {
-                    fwrite($file, json_encode($tmpMetric).",");
-                }
-                fclose($file);
-                $i = $i+1;
-            }
+            $this->calculator->execute($project, $i.".json", $hash, $dateTime, 1800);
         }
-        $repo->setEvaluatedCommits($i);
-        $repo->setGolangMetricsCalculated(true);
-        $this->repoRepository->add($repo, true);
-        $this->messageBus->dispatch(new JsonFileMergeMessage($repo->getUuid()));
+
+        $project->setLatestKnownCommit($hash);
+        $project->setEvaluatedCommits($i);
+        $project->setStatus('done');
+        $this->projectRepository->add($project, true);
+        $this->messageBus->dispatch(new CleanupFilesystemMessage($project->getUuid()));
     }
 
     private function getIncrementor($totalHashes)
     {
         $increment = 1;
-        $limit = 250;
+        $limit = $this->parameterBag->get('app.sample_limit')??250;
         if ($totalHashes > $limit) {
             $tmpIncrement = round($totalHashes / $limit, 0);
             $increment = intval($tmpIncrement);
@@ -135,24 +83,20 @@ class MetricHandler
         return $increment;
     }
 
-    private function array_median(array $array): int|float
-    {
-        if (!$array) {
-            return 0;
+    private function storeCodeChurn(Project $project) {
+//        $cmd = explode(' ', 'git log --all -M -C --name-only --format="format:" "$@" | sort | grep -v "^$" | uniq -c | sort -n');
+        $process = new Process(['git-churn'], $this->gitRepositoryManager->project($project->getUuid()));
+        $process->run();
+        $cleanedOutput = trim($process->getOutput());
+        $xs = explode("\n", $cleanedOutput);
+        foreach ($xs as $x) {
+            $out = explode(' ', trim($x));
+            if(strlen($out[1]) > 255){
+                continue;
+            }
+            $churn = new FileChurn($out[0], $out[1], $project);
+            $this->entityManager->persist($churn);
         }
-        sort($array);
-        $middleIndex = count($array) / 2;
-        if (is_float($middleIndex)) {
-            return $array[(int)$middleIndex];
-        }
-        return ($array[$middleIndex] + $array[$middleIndex - 1]) / 2;
-    }
-
-    private function array_average(array $array): int|float
-    {
-        if (!$array) {
-            return 0;
-        }
-        return array_sum($array) / count($array);
+        $this->entityManager->flush();
     }
 }

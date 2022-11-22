@@ -2,24 +2,24 @@
 
 namespace App\Service;
 
-use App\Entity\Repo;
-use App\Repository\RepoRepository;
+use App\Entity\Project;
+use App\Repository\ProjectRepository;
+use DateTime;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 abstract class AbstractMetricCalculator
 {
-    protected RepoRepository $repoRepository;
+    protected ProjectRepository $projectRepository;
     protected ParameterBagInterface $parameterBag;
 
-    public function __construct(ParameterBagInterface $parameterBag, RepoRepository $repoRepository)
+    public function __construct(ParameterBagInterface $parameterBag, ProjectRepository $projectRepository)
     {
         $this->parameterBag = $parameterBag;
-        $this->repoRepository = $repoRepository;
+        $this->projectRepository = $projectRepository;
     }
 
 
 
-    abstract public function execute(Repo $repo, string $output, int $timeout = null): array;
-    abstract public function reformatAndStore(array $result);
+    abstract public function execute(Project $project, string $output, string $commit = '', DateTime $dateTime = null, int $timeout = null): array;
     abstract public function getName(): string;
 }

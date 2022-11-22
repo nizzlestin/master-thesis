@@ -144,7 +144,6 @@ export class TestChart {
             vis.xScale.domain(d3.extent(vis.resNew, d => d.date))
 
 
-            console.log(d3.max(vis.resNew, d => d.value))
             vis.yScale.domain([0, d3.max(vis.resNew, d => d.value)]);
 
             vis.xAxis = d3.axisBottom(vis.xScale).ticks(d3.timeYear.every(1)).tickSizeOuter(vis.axisPad * 2).tickSizeInner(vis.axisPad * 2)
