@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 #[UniqueEntity('url', message: 'This url is already in use.')]
@@ -19,6 +20,7 @@ class Project
     #[ORM\Column(type: 'integer')]
     private int $id;
 
+    #[Assert\Regex('/^git@.*\.git/')]
     #[ORM\Column(type: 'string', length: 255, unique: true)]
     private string $url;
 
@@ -45,6 +47,7 @@ class Project
 
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: StatisticFile::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $statisticFiles;
+
     public function __construct()
     {
         $this->status = self::INITIALIZED;

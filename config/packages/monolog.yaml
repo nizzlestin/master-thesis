@@ -1,10 +1,20 @@
 monolog:
-    channels:
-        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+    handlers:
+        timer:
+            type: stream
+            level: debug
+            path: "%kernel.logs_dir%/timer.log"
+            channels: timer
+    channels: [deprecation, timer]
 
 when@dev:
     monolog:
         handlers:
+            timer:
+                type: stream
+                level: debug
+                path: "%kernel.logs_dir%/timer.log"
+                channels: timer
             main:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"

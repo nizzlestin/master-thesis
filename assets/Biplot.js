@@ -87,7 +87,7 @@ $(document).ready(() => {
         const mouseover = function (event, dx) {
             svg2.selectAll("*").remove()
             var $h5 = $('#timeline-h5');
-            $h5.text(`${dx.z}`)
+            $h5.text(`${dx.full}`)
             d3.json(`https://127.0.0.1:8000/metrics/single-file/${dx.fid}`).then(
                 function (data) {
                     data = data.map(d => {
@@ -157,8 +157,8 @@ $(document).ready(() => {
         const mousemove = function (event, d) {
             tooltip
                 .html(`filename: ${d.full}; churn: ${d.y}; comp: ${d.x}`)
-                .style("left", (event.x) / 120 + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
-                .style("top", (event.y) / 2 + "px")
+                .style("left", (event.x) + "px")// It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+                .style("top", (event.y) + "px")
         }
 
         // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\FileChurnRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+#[ORM\Index(fields: ["project", "file"], name: "project_file_idx")]
 #[ORM\Entity(repositoryClass: FileChurnRepository::class)]
 class FileChurn
 {
@@ -15,6 +16,9 @@ class FileChurn
 
     #[ORM\Column(type: 'integer')]
     private $churn;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private $wordFix;
 
     #[ORM\Column(type: 'string', length: 255)]
     private $file;
@@ -69,5 +73,15 @@ class FileChurn
         $this->project = $project;
 
         return $this;
+    }
+
+    public function getWordFix()
+    {
+        return $this->wordFix;
+    }
+
+    public function setWordFix($wordFix): void
+    {
+        $this->wordFix = $wordFix;
     }
 }
