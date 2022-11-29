@@ -65,15 +65,15 @@ class CloneHandler
         $evaluation->setElapsedTime($end - $start);
         $numberOfFiles = 0;
         $sloc = 0;
-        $evaluation->setNumberOfFiles($numberOfFiles);
-        $evaluation->setSloc($sloc);
-        $evaluation->setProject($project);
-        $evaluation->setOverallCommits($project->getTotalCommits());
-        $evaluation->setTask('clone');
-        $evaluation->setNumberOfCommits($this->parameterBag->get('app.sample_limit'));
-        $evaluation->setUrl($project->getUrl());
-        $evaluation->setMemory(memory_get_usage());
-        $this->entityManager->persist($evaluation);
+//        $evaluation->setNumberOfFiles($numberOfFiles);
+//        $evaluation->setSloc($sloc);
+//        $evaluation->setProject($project);
+//        $evaluation->setOverallCommits($project->getTotalCommits());
+//        $evaluation->setTask('clone');
+//        $evaluation->setNumberOfCommits($this->parameterBag->get('app.sample_limit'));
+//        $evaluation->setUrl($project->getUrl());
+//        $evaluation->setMemory(memory_get_usage());
+//        $this->entityManager->persist($evaluation);
         $this->entityManager->flush();
         $this->timerLogger->debug(sprintf('url: %s; id:%d; time in seconds: %f; memory_get_usage(): %d', $project->getUrl(), $project->getId(), $end - $start, memory_get_usage()));
     }

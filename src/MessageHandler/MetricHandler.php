@@ -90,15 +90,15 @@ class MetricHandler
             ->prepare('SELECT sum(code) FROM statistic WHERE project_id = :id')
             ->executeQuery(['id' => $project->getId()])
             ->fetchOne();
-        $evaluation->setNumberOfFiles($numberOfFiles);
-        $evaluation->setSloc($sloc);
-        $evaluation->setProject($project);
-        $evaluation->setOverallCommits($project->getTotalCommits());
-        $evaluation->setTask('metric_calculation');
-        $evaluation->setNumberOfCommits($this->parameterBag->get('app.sample_limit'));
-        $evaluation->setUrl($project->getUrl());
-        $evaluation->setMemory(memory_get_usage());
-        $this->entityManager->persist($evaluation);
+//        $evaluation->setNumberOfFiles($numberOfFiles);
+//        $evaluation->setSloc($sloc);
+//        $evaluation->setProject($project);
+//        $evaluation->setOverallCommits($project->getTotalCommits());
+//        $evaluation->setTask('metric_calculation');
+//        $evaluation->setNumberOfCommits($this->parameterBag->get('app.sample_limit'));
+//        $evaluation->setUrl($project->getUrl());
+//        $evaluation->setMemory(memory_get_usage());
+//        $this->entityManager->persist($evaluation);
         $this->entityManager->flush();
         $this->timerLogger->debug(sprintf('url: %s; id:%d; time in seconds: %f; memory_get_usage(): %d', $project->getUrl(), $project->getId(), $end - $start, memory_get_usage()));
 
