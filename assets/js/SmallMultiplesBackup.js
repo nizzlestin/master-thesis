@@ -115,6 +115,7 @@ export class SmallMultiplesBackup {
             .data(sumstat)
             .enter()
             .append("svg")
+            .attr("class", "uniqueChart")
             .attr("width", vis.width + vis.margin.left + vis.margin.right)
             .attr("height", vis.height + vis.margin.top + vis.margin.bottom)
             .append("g")
@@ -122,7 +123,7 @@ export class SmallMultiplesBackup {
                 `translate(${vis.margin.left},${vis.margin.top})`);
 
         // Add X axis --> it is a date format
-        const x = d3.scaleTime()
+        var x = d3.scaleTime()
             .domain(d3.extent(vis.dataByMetric, function (d) {
                 return d.date;
             }))
@@ -144,7 +145,7 @@ export class SmallMultiplesBackup {
             .attr("transform", "rotate(-55)");
 
         //Add Y axis
-        const y = d3.scaleLinear()
+        var y = d3.scaleLinear()
             .domain([0, d3.max(vis.dataByMetric, function (d) {
                 return +d.value;
             })])
@@ -173,6 +174,45 @@ export class SmallMultiplesBackup {
                     (d[1])
             })
 
+
+        var Tooltip = d3.selectAll('uniqueChart')
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "2px")
+            .style("border-radius", "5px")
+            .style("padding", "5px")
+
+        var mouseover = function(event) {
+            Tooltip
+                .style("opacity", 1)
+        }
+        var mousemove = function(event, d) {
+            // console.log(event.path)
+            var mouse = d3.pointer(event)
+            const xDate = x.invert(mouse[0]);
+            const bisect = d3.bisector(function (d) {
+                return d.date;
+            }).left;
+
+            Tooltip.html('test').style('display', 'block')
+                .style('left', event.pageX + 20)
+                .style('top', event.pageY - 20)
+            // console.log(xDate)
+            const idx = bisect(event.path[2].__data__[1], xDate);
+            // console.log(event, event)
+            // Tooltip
+            //     .html("Exact value: " + event.x)
+            //     .style("left", (mouse(this)[0]+70) + "px")
+            //     .style("top", (mouse(this)[1]) + "px")
+        }
+        var mouseleave = function(d) {
+            Tooltip
+                .style("opacity", 0)
+        }
+
         vis.svg.selectAll("points").data(d => d[1]).join("circle")
             .attr("class", "points")
             .attr("cx", d => x(d.date))
@@ -181,6 +221,10 @@ export class SmallMultiplesBackup {
             .attr("r", 2)
             .attr("stroke", "white")
             .attr("stroke-width", "0.1px")
+
+            .on("mouseover", mouseover)
+            .on("mousemove", mousemove.bind(vis))
+            .on("mouseleave", mouseleave)
 
         // Add titles
         vis.svg
@@ -199,6 +243,7 @@ export class SmallMultiplesBackup {
             vis.currentValue = this.value
             vis.update()
         })
+
         vis.#initSliders()
     }
 

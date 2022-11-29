@@ -35,6 +35,8 @@ class ProjectRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
         $deleteStatisticStmt = $conn->prepare("DELETE FROM statistic WHERE project_id = :projectId");
         $deleteStatisticStmt->executeStatement(['projectId' => $entity->getId()]);
+        $deleteStatisticStmt = $conn->prepare("DELETE FROM evaluation_stats WHERE project_id = :projectId");
+        $deleteStatisticStmt->executeStatement(['projectId' => $entity->getId()]);
         $deleteStatisticStmt = $conn->prepare("DELETE FROM file_churn WHERE project_id = :projectId");
         $deleteStatisticStmt->executeStatement(['projectId' => $entity->getId()]);
         $deleteStatisticFileStmt = $conn->prepare("DELETE FROM statistic_file WHERE project_id = :projectId");

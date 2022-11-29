@@ -85,13 +85,14 @@ $(document).ready(() => {
         // A function that change this tooltip when the user hover a point.
         // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
         const mouseover = function (event, dx) {
-            svg2.selectAll("*").remove()
-            var $h5 = $('#timeline-h5');
-            $h5.text(`${dx.full}`)
             d3.json(`https://127.0.0.1:8000/metrics/single-file/${dx.fid}`).then(
                 function (data) {
-                    data = data.map(d => {
-                        return {date: d3.timeParse("%Y-%m-%d")(d.commit_date), value: d.complexity}
+                    svg2.selectAll("*").remove()
+                    var $h5 = $('#timeline-h5');
+                    $h5.text(`${dx.full}`)
+                    $h5.append(`<p class="js-p">average growth rate: ${data.growth}%</p>`)
+                    data = data['data'].map(d => {
+                        return {date: d3.timeParse("%Y-%m-%d")(d.commit_date), value: d.code}
                     })
 
                     // Add X axis --> it is a date format
@@ -123,7 +124,7 @@ $(document).ready(() => {
                         .attr("y", 6)
                         .attr("dy", ".75em")
                         .attr("transform", "rotate(-90)")
-                        .text("Complexity");
+                        .text("SLOC");
 
                     svg2.append("text")
                         .attr("class", "x label")

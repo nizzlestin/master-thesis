@@ -42,6 +42,9 @@ $(document).ready(() => {
 
             value.forEach(existingV => finalData.push(existingV))
         }
+        finalData = finalData.sort((a, b) => {
+            return d3.ascending(a.file, b.file)
+        } )
 
         var res = finalData.map((d, i) => {
             var ratio = Math.round(d.code*100 / (d.comment + d.code))/100;

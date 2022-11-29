@@ -85,6 +85,7 @@
         function buttonAction() {
             const chartSpace = document.querySelector('#small-multiples')
             const svgs = chartSpace.querySelectorAll('svg')
+            const name = document.querySelector('input[name="metric_radio"]:checked').value;
             // const svgs = document.querySelectorAll('svg');
             var i = 0;
             svgs.forEach(SVGElem => {
@@ -93,7 +94,7 @@
                 const base64doc = btoa(unescape(encodeURIComponent(oDOM.outerHTML)));
                 const a = document.createElement('a');
                 const e = new MouseEvent('click');
-                a.download = 'download'+i+'.svg';
+                a.download = name+i+'.svg';
                 i++;
                 a.href = 'data:image/svg+xml;base64,' + base64doc;
                 a.dispatchEvent(e);

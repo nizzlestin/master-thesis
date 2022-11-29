@@ -11,13 +11,18 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use function array_map;
+use function array_sum;
 use function array_values;
+use function count;
 use function fclose;
 use function file_get_contents;
+use function filemtime;
 use function fopen;
 use function fwrite;
 use function json_encode;
 use function md5;
+use function round;
+use function strval;
 use const DIRECTORY_SEPARATOR;
 use const PATH_SEPARATOR;
 
@@ -59,11 +64,11 @@ class MetricDataProvider
 
     public function getMostComplexFiles(Project $project, int $limit = 10)
     {
-//        $statFile = $project->getStatisticFilesByFunctionName(__FUNCTION__);
-//        if($statFile !== null)
-//        {
-//            return file_get_contents($this->parameterBag->get('app.metric_dir').DIRECTORY_SEPARATOR.$statFile->getFilename());
-//        }
+        $statFile = $project->getStatisticFilesByFunctionName(__FUNCTION__);
+        if($statFile !== null)
+        {
+            return file_get_contents($this->parameterBag->get('app.metric_dir').DIRECTORY_SEPARATOR.$statFile->getFilename());
+        }
 
         $sql = "SELECT JSON_ARRAYAGG(JSON_OBJECT(
             'commit',s0.commit, 'language', s0.language, 'file',s0.file_basename, 'comment', s0.comment,'code', s0.code,'complexity', s0.complexity,'commit_date', DATE_FORMAT(s0.commit_date, '%d/%m/%Y')) order by s0.commit_date ASC, s0.file) FROM
@@ -123,20 +128,47 @@ class MetricDataProvider
             ->andWhere('s.fileBasename = :fileBasename')
             ->setParameter('project', $project)
             ->setParameter('fileBasename', $fileBasename)->getQuery()->getArrayResult();
+//        foreach ($st as $k =>$v) {
+//            $v['commit_date'] = $v['commitDate']->format('Y-m-d');
+//            unset($v['commitDate']);
+//            $st[$k]  = $v;
+//        }
+        $previous = null;
+        $growthRates = [];
+        foreach ($st as $k => $current) {
+            if ($current['code'] === 0) {
+                unset($st[$k]);
+                continue;
+            }
+            if($previous === null) {
+                $previous = $current;
+                continue;
+            }
+
+            $growthRates[] = 100*($current['code'] - $previous['code'])/$previous['code'];
+
+            $previous = $current;
+        }
         foreach ($st as $k =>$v) {
             $v['commit_date'] = $v['commitDate']->format('Y-m-d');
             unset($v['commitDate']);
             $st[$k]  = $v;
         }
-        return $st;
+        if(empty($growthRates))
+        {
+            $growth = 'NaN';
+        } else {
+            $growth = strval(round(array_sum($growthRates)/count($growthRates), 3));
+        }
+        return ['data' => $st, 'growth' => $growth];
     }
 
     public function getComplexityChurnMetrics(Project $project)
     {
-//        $statFile = $project->getStatisticFilesByFunctionName(__FUNCTION__);
-//        if ($statFile !== null) {
-//            return file_get_contents($this->parameterBag->get('app.metric_dir') . DIRECTORY_SEPARATOR . $statFile->getFilename());
-//        }
+        $statFile = $project->getStatisticFilesByFunctionName(__FUNCTION__);
+        if ($statFile !== null) {
+            return file_get_contents($this->parameterBag->get('app.metric_dir') . DIRECTORY_SEPARATOR . $statFile->getFilename());
+        }
         $sql = "SELECT s.file, s.file_basename, complexity, churn, f.id as fid FROM statistic s
                     LEFT JOIN file_churn f ON s.project_id = f.project_id AND f.file = s.file_basename 
                     WHERE s.project_id = :id AND s.commit=:hash AND f.project_id = :id;";

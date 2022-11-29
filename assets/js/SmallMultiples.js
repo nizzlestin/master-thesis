@@ -96,7 +96,7 @@ export class SmallMultiples {
             .style("fill", d => vis.color(d.language))
             .attr("r", 2)
             .attr("stroke", "white")
-            .attr("stroke-width", "0.1px")
+            .attr("stroke-width", "0.0px")
     }
     rerender() {
         const vis = this;
@@ -180,7 +180,7 @@ export class SmallMultiples {
             .style("fill", d => vis.color(d.language))
             .attr("r", 2)
             .attr("stroke", "white")
-            .attr("stroke-width", "0.1px")
+            .attr("stroke-width", "0.0px")
 
         // Add titles
         vis.svg

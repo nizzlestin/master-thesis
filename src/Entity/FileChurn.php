@@ -20,6 +20,10 @@ class FileChurn
     #[ORM\Column(type: 'integer', nullable: true)]
     private $wordFix;
 
+    #[ORM\Column(type: 'float', nullable: true)]
+    private $avgGrowth;
+
+
     #[ORM\Column(type: 'string', length: 255)]
     private $file;
 
@@ -83,5 +87,15 @@ class FileChurn
     public function setWordFix($wordFix): void
     {
         $this->wordFix = $wordFix;
+    }
+
+    public function getAvgGrowth()
+    {
+        return $this->avgGrowth;
+    }
+
+    public function setAvgGrowth($avgGrowth): void
+    {
+        $this->avgGrowth = $avgGrowth;
     }
 }
