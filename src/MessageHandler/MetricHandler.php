@@ -129,7 +129,7 @@ class MetricHandler
             if (strlen($out[1]) > 255) {
                 continue;
             }
-            $churn = new FileChurn($out[0], $out[1], $project);
+            $churn = new FileChurn(intval($out[0]), $out[1], $project);
             $this->entityManager->persist($churn);
         }
         $this->entityManager->flush();
