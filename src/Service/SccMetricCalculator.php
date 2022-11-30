@@ -27,7 +27,7 @@ class SccMetricCalculator extends AbstractMetricCalculator
     public function execute(Project $project, string $output = "out.json", string $commit = '', DateTime $date = null, int $timeout = null): array
     {
         $id = $project->getUuid();
-        $out =
+
         $process = new Process(
             [
                 'scc',

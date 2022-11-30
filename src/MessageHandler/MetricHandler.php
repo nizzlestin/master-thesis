@@ -79,18 +79,18 @@ class MetricHandler
         $project->setStatus('done');
         $this->projectRepository->add($project, true);
         $end = microtime(true);
-        $evaluation = new EvaluationStats();
-        $evaluation->setElapsedTime($end - $start);
-        $numberOfFiles = $this->entityManager
-            ->getConnection()
-            ->prepare('SELECT count(id) FROM statistic WHERE project_id = :id')
-            ->executeQuery(['id' => $project->getId()])
-            ->fetchOne();
-        $sloc = $this->entityManager
-            ->getConnection()
-            ->prepare('SELECT sum(code) FROM statistic WHERE project_id = :id')
-            ->executeQuery(['id' => $project->getId()])
-            ->fetchOne();
+//        $evaluation = new EvaluationStats();
+//        $evaluation->setElapsedTime($end - $start);
+//        $numberOfFiles = $this->entityManager
+//            ->getConnection()
+//            ->prepare('SELECT count(id) FROM statistic WHERE project_id = :id')
+//            ->executeQuery(['id' => $project->getId()])
+//            ->fetchOne();
+//        $sloc = $this->entityManager
+//            ->getConnection()
+//            ->prepare('SELECT sum(code) FROM statistic WHERE project_id = :id')
+//            ->executeQuery(['id' => $project->getId()])
+//            ->fetchOne();
 //        $evaluation->setNumberOfFiles($numberOfFiles);
 //        $evaluation->setSloc($sloc);
 //        $evaluation->setProject($project);
@@ -124,9 +124,11 @@ class MetricHandler
         $process->setTimeout(300);
         $process->run();
         $cleanedOutput = trim($process->getOutput());
+        $this->timerLogger->debug($process->getOutput());
+        $this->timerLogger->debug($process->getErrorOutput());
         $xs = explode("\n", $cleanedOutput);
         foreach ($xs as $x) {
-            $this->timerLogger->debug($x);
+
             $out = explode(' ', trim($x));
             if (strlen($out[1]) > 255 || $out[1] == null) {
                 continue;
