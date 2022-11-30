@@ -126,8 +126,8 @@ class MetricHandler
         $cleanedOutput = trim($process->getOutput());
         $xs = explode("\n", $cleanedOutput);
         foreach ($xs as $x) {
+            $this->timerLogger->debug($x);
             $out = explode(' ', trim($x));
-            $this->timerLogger->debug(print_r($x));
             if (strlen($out[1]) > 255 || $out[1] == null) {
                 continue;
             }
