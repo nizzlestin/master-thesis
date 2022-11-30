@@ -120,7 +120,7 @@ class MetricHandler
     private function storeCodeChurn(Project $project)
     {
 //        $cmd = explode(' ', 'git log --all -M -C --name-only --format="format:" "$@" | sort | grep -v "^$" | uniq -c | sort -n');
-        $process = new Process(['git-churn'], $this->gitRepositoryManager->project($project->getUuid()));
+        $process = new Process(['/usr/local/bin/git-churn'], $this->gitRepositoryManager->project($project->getUuid()));
         $process->setTimeout(300);
         $process->run();
         $cleanedOutput = trim($process->getOutput());
