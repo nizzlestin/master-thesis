@@ -21,6 +21,7 @@ use Symfony\Component\Process\Process;
 use function explode;
 use function memory_get_usage;
 use function microtime;
+use function print_r;
 use function sprintf;
 use function strlen;
 
@@ -126,7 +127,8 @@ class MetricHandler
         $xs = explode("\n", $cleanedOutput);
         foreach ($xs as $x) {
             $out = explode(' ', trim($x));
-            if (strlen($out[1]) > 255) {
+            $this->timerLogger->debug(print_r($x));
+            if (strlen($out[1]) > 255 || $out[1] == null) {
                 continue;
             }
             $churn = new FileChurn(intval($out[0]), $out[1], $project);
