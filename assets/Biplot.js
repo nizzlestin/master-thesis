@@ -85,7 +85,7 @@ $(document).ready(() => {
         // A function that change this tooltip when the user hover a point.
         // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
         const mouseover = function (event, dx) {
-            d3.json(`https://127.0.0.1:8000/metrics/single-file/${dx.fid}`).then(
+            d3.json(`/metrics/single-file/${dx.fid}`).then(
                 function (data) {
                     svg2.selectAll("*").remove()
                     var $h5 = $('#timeline-h5');
